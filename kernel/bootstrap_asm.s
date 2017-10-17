@@ -23,14 +23,20 @@ dd MULTIBOOT_MAGIC
 dd MULTIBOOT_FLAGS
 dd MULTIBOOT_CHECKSUM
 
+STACK_SIZE equ 0x100000 ; 1Mo
+
 entrypoint:
 	; code starts executing here
 	cli  ; disable hardware interrupts
 
 	; TODO :
 	; - Initialize the stack pointer and EBP (both to the same value)
+	mov esp, stack + STACK_SIZE
+	mov ebp, esp
 	; - Pass the multiboot info to the kernel
+	push ebx
 	; - Call the kernel entry point (C code)
+	call kernel_init
 	; ...
 
 	; infinite loop (should never get here)
@@ -42,3 +48,6 @@ entrypoint:
 ; TODO : declare a .stack section for the kernel. It should at least be 1MB long. Given this stack
 ; area won't be initialized, the nobits keyword should be added when declaring the section.
 ; ...
+
+section .stack nobits
+stack resb STACK_SIZE
