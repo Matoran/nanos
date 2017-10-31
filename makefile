@@ -1,7 +1,7 @@
 BOOT=build/boot/grub
 KERNEL=build/boot/mykernel.elf
 all: iso qemu
-iso: nanos.iso	
+iso: nanos.iso
 nanos.iso: $(KERNEL) $(BOOT)/stage2_eltorito $(BOOT)/menu.lst
 	genisoimage -R -b boot/grub/stage2_eltorito -input-charset utf8 -no-emul-boot -boot-info-table -o nanos.iso build	
 $(BOOT):
