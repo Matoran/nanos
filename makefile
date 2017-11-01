@@ -16,5 +16,5 @@ $(KERNEL): $(BOOT)
 qemu: nanos.iso
 	qemu-system-i386 -cdrom nanos.iso
 clean:
-	rm -f -R build
+	rm -f -R build nanos.iso
 

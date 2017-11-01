@@ -7,9 +7,10 @@
 
 void *memset(void *dst, int value, uint count){
     char *d = dst;
-    for (int i = 0; i < count; ++i) {
+    for (uint i = 0; i < count; ++i) {
         *d++ = value;
     }
+    return dst;
 }
 
 /**
@@ -22,9 +23,10 @@ void *memset(void *dst, int value, uint count){
 void *memcpy(void *dst, void *src, uint count){
     char *d = dst;
     char *s = src;
-    for (int i = 0; i < count; ++i) {
+    for (uint i = 0; i < count; ++i) {
         *d++ = *s++;
     }
+    return dst;
 }
 
 /**
@@ -35,7 +37,7 @@ void *memcpy(void *dst, void *src, uint count){
  * @return -1 if p < q, 1 if p > q, 0 if p == q
  */
 int strncmp(const char *p, const char *q, uint n){
-    for (int i = 0; i < n; ++i) {
+    for (uint i = 0; i < n; ++i) {
         if(*p > *q){
             return 1;
         }else if(*p < *q){
