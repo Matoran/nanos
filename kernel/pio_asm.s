@@ -5,9 +5,10 @@ global inw
 
 outb:
     enter 0,0
-    mov al,[ebp+8]
-    mov dx,[ebp+12]
+    mov al,[ebp+12]
+    mov dx,[ebp+8]
     out dx,al
+
     leave
     ret
 

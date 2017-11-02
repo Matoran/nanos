@@ -1,5 +1,5 @@
-kernel.elf: bootstrap_asm.o gdt_asm.o kernel.o gdt.o memory.o kernel.ld
-	gcc -static -Tkernel.ld -m32 -ffreestanding -nostdlib bootstrap_asm.o gdt_asm.o kernel.o gdt.o memory.o -o kernel.elf -lgcc
+kernel.elf: bootstrap_asm.o gdt_asm.o pio_asm.o kernel.o gdt.o memory.o console.o kernel.ld
+	gcc -static -Tkernel.ld -m32 -ffreestanding -nostdlib bootstrap_asm.o gdt_asm.o pio_asm.o kernel.o gdt.o memory.o console.o -o kernel.elf -lgcc
 %.o: %.s
 	nasm -f elf32 $<
 %.o: %.c
