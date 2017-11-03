@@ -14,11 +14,47 @@ void console_init(){
     pos.x = 0;
     pos.y = 0;
     move_cursor(pos);
-    console_clear();
+    //console_clear();
+    int t = 0;
+    while(1){
+        move_cursor(pos);
+        console_test(t);
+        sleep();
+        if(t){
+            t = 0;
+        }else{
+            t = 1;
+        }
+    }
 
-    move_cursor(pos);
-    print_string("abcdefghijklmnopqrstuvwxyz 0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    printf(":%s:%c:%d:%d:", "string test printf", 'A', 42, -42);
+
+}
+
+void console_test(int t){
+    for (int line = 0; line < HEIGHT; ++line) {
+        for (int column = 0; column < WIDTH; ++column) {
+            if(line%2 == t){
+                if(column%2 == 0){
+                    console_set_background_color(COLOR_BLACK);
+                }else{
+                    console_set_background_color(COLOR_LIGTH_WHITE);
+                }
+            }else{
+                if(column%2 == 0){
+                    console_set_background_color(COLOR_LIGTH_WHITE);
+                }else{
+                    console_set_background_color(COLOR_BLACK);
+                }
+            }
+            print_char(' ');
+        }
+    }
+}
+
+void sleep(){
+    for (int i = 0; i < 100000000; ++i) {
+        asm("nop");
+    }
 }
 
 void console_clear(){
@@ -106,18 +142,10 @@ void printf(char *fmt, ...){
                         print_string((char*)*((int*)(base+nb_var*4)));
                         break;
                     case 'd':
-                        val = *((int*)(base+nb_var*4));
-                        if(val < 0){
-                            print_int(val);
-                            print_string("negatif");
-                            print_char('-');
-                        }else{
-                            print_int(val);
-                            print_string("positif");
-                        }
+                        print_int(*((int*)(base+nb_var*4)), 10);
                         break;
                     case 'x':
-
+                        print_int(*((int*)(base+nb_var*4)), 16);
                         break;
                 }
                 nb_var++;
@@ -132,17 +160,26 @@ void printf(char *fmt, ...){
 }
 
 //TODO
-void print_int(int num){
+//
+#define ALPHABET "0123456789ABCDEF"
+void print_int(int num, uchar base){
     int len = 0;
-    int shift = 3;
     char number[11];
-    while(num >= 10){
-        number[len] = (char)((num % 10)+48);
-        num /= 10;
-        len++;
-        shift++;
+    if(num < 0){
+        num *= -1;
+        print_char('-');
     }
+    while(num >= base){
+        number[len++] = ALPHABET[num % base];
+        num /= base;
+    }
+    number[len++] = ALPHABET[num];
     number[len] = '\0';
+    for(int i=0; i < len/2; i++){
+        char temp = number[i];
+        number[i] = number[len-i-1];
+        number[len-i-1] = temp;
+    }
     print_string(number);
 
 }

@@ -10,7 +10,7 @@ $(BOOT)/stage2_eltorito: $(BOOT) grub/stage2_eltorito
 	cp grub/stage2_eltorito $(BOOT)/stage2_eltorito
 $(BOOT)/menu.lst: $(BOOT) grub/menu.lst
 	cp grub/menu.lst $(BOOT)/menu.lst
-$(KERNEL): $(BOOT)
+$(KERNEL): $(BOOT) kernel
 	make -C kernel
 	mv kernel/kernel.elf $(KERNEL)
 qemu: nanos.iso
