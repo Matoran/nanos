@@ -32,20 +32,27 @@ typedef struct position_st{
     uchar y;
 } position_t;
 
-void console_init();
-void console_clear();
-uchar console_background_color();
-void console_set_background_color(uchar color);
-uchar console_foreground_color();
-void console_set_foreground_color(uchar color);
-void console_test(int t);
-void sleep();
-void print_char(char c);
-void print_string(char *string);
-void move_cursor(position_t position);
-position_t read_cursor();
-void printf(char *fmt, ...);
-void print_int(int num, uchar base);
+extern void console_init();
+
+extern void console_clear();
+
+extern uchar console_background_color();
+
+extern void console_set_background_color(uchar color);
+
+extern uchar console_foreground_color();
+
+extern void console_set_foreground_color(uchar color);
+
+extern void console_checkerboard_blink(int t);
+
+extern void sleep(int multiplier);
+
+extern position_t read_cursor();
+
+extern void move_cursor(position_t position);
+
+extern void printf(char *fmt, ...);
 extern void outb(int *address, uchar value);
 extern void outw(int *address, ushort value);
 extern uchar inb(int *address);

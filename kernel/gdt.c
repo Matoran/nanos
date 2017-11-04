@@ -6,7 +6,7 @@
 static gdt_entry_t gdt_table[3];
 
 // Pointeur sur la table GDT
-static gdt_ptr_t   gdt_ptr;
+static gdt_ptr_t gdt_ptr;
 
 // Build and return a GDT entry.
 // base is the base of the segment
@@ -18,7 +18,7 @@ static gdt_ptr_t   gdt_ptr;
 // dpl is the privilege level
 static gdt_entry_t build_entry(uint32_t base, uint32_t limit, uint8_t type, uint8_t s, uint8_t db,
                                uint8_t granularity, uint8_t dpl) {
-	gdt_entry_t entry;
+    gdt_entry_t entry;
     // For a TSS and LDT, base is the addresse of the TSS/LDT structure
     // and limit is the size of the structure.
     entry.lim15_0 = limit & 0xffff;
@@ -34,38 +34,38 @@ static gdt_entry_t build_entry(uint32_t base, uint32_t limit, uint8_t type, uint
     entry.db = db;      // 1 for 32-bit code and data segments; 0 for system (TSS, LDT, gate)
     entry.granularity = granularity;  // granularity of the limit value: 0 = 1 byte; 1 = 4096 bytes
     entry.base31_24 = (base >> 24) & 0xff;
-	return entry;
+    return entry;
 }
 
 // Create a NULL "segment".
 static gdt_entry_t gdt_make_null_segment() {
-	gdt_entry_t entry;
-	memset(&entry, 0, sizeof(gdt_entry_t));
-	return entry;
+    gdt_entry_t entry;
+    memset(&entry, 0, sizeof(gdt_entry_t));
+    return entry;
 }
 
 // Create a code segment specified by the base, limit and privilege level passed in arguments.
 static gdt_entry_t gdt_make_code_segment(uint32_t base, uint32_t limit, uint8_t dpl) {
-	return build_entry(base, limit, TYPE_CODE_EXECREAD, S_CODE_OR_DATA, DB_SEG, 1, dpl);
+    return build_entry(base, limit, TYPE_CODE_EXECREAD, S_CODE_OR_DATA, DB_SEG, 1, dpl);
 }
 
 // Return a data segment specified by the base, limit and privilege level passed in arguments.
 static gdt_entry_t gdt_make_data_segment(uint32_t base, uint32_t limit, uint8_t dpl) {
-	return build_entry(base, limit, TYPE_DATA_READWRITE, S_CODE_OR_DATA, DB_SEG, 1, dpl);
+    return build_entry(base, limit, TYPE_DATA_READWRITE, S_CODE_OR_DATA, DB_SEG, 1, dpl);
 }
 
 // Initialize the GDT
 void gdt_init() {
-	// Code and data segments must have a privilege level of 0.
-	gdt_table[0] = gdt_make_null_segment();
-	gdt_table[1] = gdt_make_code_segment(0,ALL_PHYSIC_SPACE-1, DPL_KERNEL);
-	gdt_table[2] = gdt_make_data_segment(0,ALL_PHYSIC_SPACE-1, DPL_KERNEL);
+    // Code and data segments must have a privilege level of 0.
+    gdt_table[0] = gdt_make_null_segment();
+    gdt_table[1] = gdt_make_code_segment(0, ALL_PHYSIC_SPACE - 1, DPL_KERNEL);
+    gdt_table[2] = gdt_make_data_segment(0, ALL_PHYSIC_SPACE - 1, DPL_KERNEL);
 
-	gdt_ptr.base = (uint32_t) &gdt_table;
-	gdt_ptr.limit = sizeof(gdt_table);
+    gdt_ptr.base = (uint32_t) &gdt_table;
+    gdt_ptr.limit = sizeof(gdt_table) - 1;
 
 
-  // Load the GDT
-  gdt_load(&gdt_ptr);
+    // Load the GDT
+    gdt_load(&gdt_ptr);
 }
 

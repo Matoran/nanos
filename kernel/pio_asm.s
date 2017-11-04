@@ -14,8 +14,8 @@ outb:
 
 outw:
     enter 0,0
-    mov ax,[ebp+8]
-    mov dx,[ebp+12]
+    mov ax,[ebp+12]
+    mov dx,[ebp+8]
     out dx,ax
     leave
     ret
