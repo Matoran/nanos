@@ -1,6 +1,9 @@
-//
-// Created by matoran on 11/1/17.
-//
+/**
+ * @authors: LOPES Marco, ISELI Cyril
+ * Purpose: Kernel
+ * Language:  C
+ * Date : October/November 2017
+ */
 
 #include "kernel.h"
 #include "gdt.h"
@@ -9,6 +12,10 @@
 #include "memory.h"
 #include "console_tests.h"
 
+/**
+ * Initialise the kernel
+ * @param informations of multiboot
+ */
 void kernel_init(multiboot_info_t *informations) {
     gdt_init();
     console_init();

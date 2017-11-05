@@ -1,7 +1,9 @@
-//
-// Created by matoran on 11/2/17.
-//
-
+/**
+ * @authors: LOPES Marco, ISELI Cyril
+ * Purpose: Management for display console
+ * Language:  C
+ * Date : October/November 2017
+ */
 #include "console.h"
 #include "memory.h"
 
@@ -9,7 +11,9 @@
 static uchar BACKGROUND_COLOR = COLOR_BLACK;
 static uchar FOREGROUND_COLOR = COLOR_GREEN;
 
-
+/**
+ * Scroll the graphics console
+ */
 static void scroll() {
     memcpy((ushort *) SCREEN, (ushort *) (SCREEN + WIDTH * 2), (HEIGHT - 1) * WIDTH * 2);
     for (int i = 0; i < WIDTH; ++i) {
@@ -22,6 +26,10 @@ static void scroll() {
     move_cursor(pos);
 }
 
+/**
+ * Print char into the console
+ * @param c char we want print
+ */
 static void print_char(char c) {
     position_t pos = read_cursor();
     *((ushort *) (SCREEN + pos.x * 2 + pos.y * WIDTH * 2)) = (ushort) (c | FOREGROUND_COLOR << 8 |
@@ -36,13 +44,21 @@ static void print_char(char c) {
     }
 }
 
+/**
+ * Print string into the console
+ * @param string string we want print
+ */
 static void print_string(char *string) {
     while (*string != 0) {
         print_char(*(string++));
     }
 }
 
-
+/**
+ * Print an number into the console
+ * @param num number we want print
+ * @param base of number
+ */
 static void print_int(int num, uchar base) {
     int len = 0;
     char number[11];
@@ -65,19 +81,28 @@ static void print_int(int num, uchar base) {
 
 }
 
+/**
+ * Initialise the console
+ */
 void console_init() {
     console_set_background_color(COLOR_LIGHT_GRAY);
     console_set_foreground_color(COLOR_RED);
     console_clear();
 }
 
-
+/**
+ * Sleep a moment
+ * @param multiplier for sleep longer
+ */
 void sleep(int multiplier) {
     for (int i = 0; i < 100000000 * multiplier; ++i) {
         asm("nop");
     }
 }
 
+/**
+ * Clear the console
+ */
 void console_clear() {
     position_t pos;
     pos.x = 0;
@@ -91,22 +116,42 @@ void console_clear() {
     move_cursor(pos);
 }
 
+/**
+ * Get the background color of the console
+ * @return the color
+ */
 uchar console_background_color() {
     return BACKGROUND_COLOR;
 }
 
+/**
+ * Set the background color of the console
+ * @param color
+ */
 void console_set_background_color(uchar color) {
     BACKGROUND_COLOR = color;
 }
 
+/**
+ * Get the foreground color of the text
+ * @return the color
+ */
 uchar console_foreground_color() {
     return FOREGROUND_COLOR;
 }
 
+/**
+ * Set the foreground color of the text
+ * @param color
+ */
 void console_set_foreground_color(uchar color) {
     FOREGROUND_COLOR = color;
 }
 
+/**
+ * Read the cursor position
+ * @return position
+ */
 position_t read_cursor() {
     position_t pos;
     ushort pos1D = 0;
@@ -119,6 +164,10 @@ position_t read_cursor() {
     return pos;
 }
 
+/**
+ * Move the cursor
+ * @param position
+ */
 void move_cursor(position_t position) {
     uint16_t pos1D = position.x + position.y * WIDTH;
     outb((int *) 0x3D4, 0xE);
@@ -128,12 +177,13 @@ void move_cursor(position_t position) {
 }
 
 /**
+ * Printf like in C
  * %c char
  * %s string
  * %d signed decimal integer
  * %x unsigned hexadecimal integer
- * @param fmt
- * @param ...
+ * @param fmt format
+ * @param ... all the variables
  */
 void printf(char *fmt, ...) {
     bool var = false;

@@ -1,7 +1,3 @@
-//
-// Created by matoran on 11/2/17.
-//
-
 #ifndef NANOS_CONSOLE_H
 #define NANOS_CONSOLE_H
 
@@ -59,4 +55,4 @@ extern uchar inb(int *address);
 extern ushort inw(int *address);
 
 
-#endif //NANOS_CONSOLE_H
+#endif

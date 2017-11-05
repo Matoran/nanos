@@ -1,3 +1,4 @@
+;function PIO
 global outb
 global outw
 global inb
@@ -8,7 +9,6 @@ outb:
     mov al,[ebp+12]
     mov dx,[ebp+8]
     out dx,al
-
     leave
     ret
 

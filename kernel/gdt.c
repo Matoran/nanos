@@ -1,3 +1,9 @@
+/**
+ * @authors: LOPES Marco, ISELI Cyril
+ * Purpose: GDT
+ * Language:  C
+ * Date : October/November 2017
+ */
 #include "../common/types.h"
 #include "gdt.h"
 #include "x86.h"
@@ -57,6 +63,7 @@ static gdt_entry_t gdt_make_data_segment(uint32_t base, uint32_t limit, uint8_t 
 // Initialize the GDT
 void gdt_init() {
     // Code and data segments must have a privilege level of 0.
+    //Create segments
     gdt_table[0] = gdt_make_null_segment();
     gdt_table[1] = gdt_make_code_segment(0, ALL_PHYSIC_SPACE - 1, DPL_KERNEL);
     gdt_table[2] = gdt_make_data_segment(0, ALL_PHYSIC_SPACE - 1, DPL_KERNEL);

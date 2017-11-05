@@ -1,10 +1,19 @@
-//
-// Created by matoran on 10/31/17.
-//
+/**
+ * @authors: LOPES Marco, ISELI Cyril
+ * Purpose: Base function
+ * Language:  C
+ * Date : October/November 2017
+ */
 
 #include "memory.h"
 
-
+/**
+ * Set the value in the destination
+ * @param dst address destination
+ * @param value
+ * @param count number of bytes
+ * @return destination
+ */
 void *memset(void *dst, int value, uint count){
     char *d = dst;
     for (uint i = 0; i < count; ++i) {
@@ -14,11 +23,11 @@ void *memset(void *dst, int value, uint count){
 }
 
 /**
- * Copy src to dst of
- * @param dst
- * @param src
- * @param count
- * @return
+ * Copy source to destination
+ * @param dst pointer to the destination
+ * @param src pointer to the source
+ * @param count number bytes to copy
+ * @return destination
  */
 void *memcpy(void *dst, void *src, uint count){
     char *d = dst;

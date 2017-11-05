@@ -1,10 +1,16 @@
-//
-// Created by matoran on 11/4/17.
-//
+/**
+ * @authors: LOPES Marco, ISELI Cyril
+ * Purpose: Tests for the display console
+ * Language:  C
+ * Date : October/November 2017
+ */
 
 #include "console_tests.h"
 #include "console.h"
 
+/**
+ * Test the scroll
+ */
 static void scroll() {
     for (int i = 0; i < 30; ++i) {
         printf("%d\n", i);
@@ -20,6 +26,10 @@ static void scroll() {
     }
 }
 
+/**
+ * Display a blink checkerboard
+ * @param black boolean which displays in black or in white
+ */
 static void checkerboard_blink(bool black) {
     for (int line = 0; line < HEIGHT; ++line) {
         for (int column = 0; column < WIDTH; ++column) {
@@ -42,6 +52,10 @@ static void checkerboard_blink(bool black) {
     printf("checkerboard blinking");
 }
 
+/**
+ * Zoom on the checkerboard
+ * @param size of zoom
+ */
 static void checkerboard_zoom(int size) {
     for (int line = 0; line < HEIGHT - 1; ++line) {
         for (int column = 0; column < WIDTH; ++column) {
