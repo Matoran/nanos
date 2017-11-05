@@ -4,7 +4,7 @@ global outw
 global inb
 global inw
 
-outb:
+outb: ; write byte
     enter 0,0
     mov al,[ebp+12]
     mov dx,[ebp+8]
@@ -12,7 +12,7 @@ outb:
     leave
     ret
 
-outw:
+outw: ; write word
     enter 0,0
     mov ax,[ebp+12]
     mov dx,[ebp+8]
@@ -20,14 +20,14 @@ outw:
     leave
     ret
 
-inb:
+inb: ; read byte
     enter 0,0
     mov dx,[ebp+8]
     in al,dx
     leave
     ret
 
-inw:
+inw: ; read word
     enter 0,0
     mov dx, [ebp+8]
     in ax,dx

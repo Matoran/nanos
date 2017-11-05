@@ -7,7 +7,7 @@
 #include "../common/types.h"
 #include "gdt.h"
 #include "x86.h"
-#include "memory.h"
+#include "../common/memory.h"
 
 static gdt_entry_t gdt_table[3];
 

@@ -4,8 +4,8 @@
  * Language:  C
  * Date : October/November 2017
  */
-#include "console.h"
-#include "memory.h"
+#include "../common/console.h"
+#include "../common/memory.h"
 
 #define ALPHABET "0123456789ABCDEF"
 static uchar BACKGROUND_COLOR = COLOR_BLACK;
@@ -60,6 +60,10 @@ static void print_string(char *string) {
  * @param base of number
  */
 static void print_int(int num, uchar base) {
+    if (base != 10 && base != 16) {
+        printf("base %d not supported", base);
+        return;
+    }
     int len = 0;
     char number[11];
     if (num < 0) {
@@ -177,13 +181,13 @@ void move_cursor(position_t position) {
 }
 
 /**
- * Printf like in C
+ * Printf
  * %c char
  * %s string
  * %d signed decimal integer
  * %x unsigned hexadecimal integer
  * @param fmt format
- * @param ... all the variables
+ * @param ... all variables
  */
 void printf(char *fmt, ...) {
     bool var = false;

@@ -5,7 +5,7 @@
  * Date : October/November 2017
  */
 
-#include "memory.h"
+#include "../common/memory.h"
 
 /**
  * Set the value in the destination

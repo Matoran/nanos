@@ -1,7 +1,7 @@
 #ifndef NANOS_CONSOLE_H
 #define NANOS_CONSOLE_H
 
-#include "../common/types.h"
+#include "types.h"
 
 #define COLOR_BLACK 0
 #define COLOR_BLUE 1
@@ -23,7 +23,7 @@
 #define HEIGHT (uchar)25
 #define SCREEN 0xB8000
 
-typedef struct position_st{
+typedef struct position_st {
     uchar x;
     uchar y;
 } position_t;
@@ -40,8 +40,6 @@ extern uchar console_foreground_color();
 
 extern void console_set_foreground_color(uchar color);
 
-extern void console_checkerboard_blink(int t);
-
 extern void sleep(int multiplier);
 
 extern position_t read_cursor();
@@ -49,9 +47,13 @@ extern position_t read_cursor();
 extern void move_cursor(position_t position);
 
 extern void printf(char *fmt, ...);
+
 extern void outb(int *address, uchar value);
+
 extern void outw(int *address, ushort value);
+
 extern uchar inb(int *address);
+
 extern ushort inw(int *address);
 
 

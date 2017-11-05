@@ -1,7 +1,7 @@
 #ifndef NANOS_MEMORY_H
 #define NANOS_MEMORY_H
 
-#include "../common/types.h"
+#include "types.h"
 
 extern void *memset(void *dst, int value, uint count);
 

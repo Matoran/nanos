@@ -6,7 +6,7 @@
  */
 
 #include "console_tests.h"
-#include "console.h"
+#include "../common/console.h"
 
 /**
  * Test the scroll
