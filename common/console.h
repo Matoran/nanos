@@ -40,7 +40,7 @@ extern uchar console_foreground_color();
 
 extern void console_set_foreground_color(uchar color);
 
-extern void sleep(float multiplier);
+extern void sleepOld(float multiplier);
 
 extern position_t read_cursor();
 
@@ -48,13 +48,13 @@ extern void move_cursor(position_t position);
 
 extern void printf(char *fmt, ...);
 
-extern void outb(int *address, uchar value);
+extern void outb(uint16_t port, uint8_t data);
 
-extern void outw(int *address, ushort value);
+extern void outw(uint16_t port, uint16_t data);
 
-extern uchar inb(int *address);
+extern uchar inb(uint16_t port);
 
-extern ushort inw(int *address);
+extern ushort inw(uint16_t port);
 
 
 #endif

@@ -11,6 +11,9 @@
 #include "../common/console.h"
 #include "../common/memory.h"
 #include "console_tests.h"
+#include "idt.h"
+#include "x86.h"
+#include "pic.h"
 
 /**
  * Initialise the kernel
@@ -18,7 +21,10 @@
  */
 void kernel_init(multiboot_info_t *informations) {
     gdt_init();
+    pic_init();
+    idt_init();
     console_init();
+
     printf("RAM %dKB\n", informations->mem_upper);
     printf("GDT initialized\n");
     printf("Display initialized\n");
@@ -30,5 +36,6 @@ void kernel_init(multiboot_info_t *informations) {
 #else
     printf("Test mode off\n");
 #endif
+    sti();
 }
 

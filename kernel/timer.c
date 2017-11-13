@@ -1,3 +1,5 @@
+#include "timer.h"
+
 void timer_init(uint32_t freq_hz) {
 
 }

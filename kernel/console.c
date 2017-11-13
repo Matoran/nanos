@@ -98,7 +98,7 @@ void console_init() {
  * Sleep a moment
  * @param multiplier for sleep longer
  */
-void sleep(float multiplier) {
+void sleepOld(float multiplier) {
     for (int i = 0; i < 1000000 * multiplier; ++i) {
         asm("nop");
     }
@@ -159,10 +159,10 @@ void console_set_foreground_color(uchar color) {
 position_t read_cursor() {
     position_t pos;
     ushort pos1D = 0;
-    outb((int *) 0x3D4, 0xE);
-    pos1D = inb((int *) 0x3D5) << 8;
-    outb((int *) 0x3D4, 0xF);
-    pos1D |= inb((int *) 0x3D5);
+    outb(0x3D4, 0xE);
+    pos1D = inb(0x3D5) << 8;
+    outb(0x3D4, 0xF);
+    pos1D |= inb(0x3D5);
     pos.x = pos1D % WIDTH;
     pos.y = pos1D / WIDTH;
     return pos;
@@ -174,10 +174,10 @@ position_t read_cursor() {
  */
 void move_cursor(position_t position) {
     uint16_t pos1D = position.x + position.y * WIDTH;
-    outb((int *) 0x3D4, 0xE);
-    outb((int *) 0x3D5, (uchar) (pos1D >> 8));
-    outb((int *) 0x3D4, 0xF);
-    outb((int *) 0x3D5, (uchar) (pos1D));
+    outb(0x3D4, 0xE);
+    outb(0x3D5, (uchar) (pos1D >> 8));
+    outb(0x3D4, 0xF);
+    outb(0x3D5, (uchar) (pos1D));
 }
 
 /**
