@@ -40,7 +40,7 @@ extern uchar console_foreground_color();
 
 extern void console_set_foreground_color(uchar color);
 
-extern void sleep(int multiplier);
+extern void sleep(float multiplier);
 
 extern position_t read_cursor();
 

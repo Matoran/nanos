@@ -60,14 +60,24 @@ static void checkerboard_zoom(int size) {
     for (int line = 0; line < HEIGHT - 1; ++line) {
         for (int column = 0; column < WIDTH; ++column) {
             if (line / size % 2 == column / size % 2) {
-                console_set_background_color(COLOR_LIGTH_RED);
+                console_set_background_color((size-1)%16);
             } else {
-                console_set_background_color(COLOR_LIGTH_GREEN);
+                console_set_background_color(15-((size-1)%16));
             }
             printf(" ");
         }
     }
     printf("checkerboard zooming");
+}
+
+static void color(){
+    while(1){
+        for (uchar i = 0; i <= 12; ++i) {
+            console_set_background_color(i);
+            printf(" ");
+            sleep(0.1);
+        }
+    }
 }
 
 void console_tests() {
@@ -86,6 +96,8 @@ void console_tests() {
     for (int i = 1; i <= HEIGHT; ++i) {
         move_cursor(pos);
         checkerboard_zoom(i);
-        sleep(1);
+        sleep(100);
     }
+    move_cursor(pos);
+    color();
 }

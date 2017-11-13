@@ -98,8 +98,8 @@ void console_init() {
  * Sleep a moment
  * @param multiplier for sleep longer
  */
-void sleep(int multiplier) {
-    for (int i = 0; i < 100000000 * multiplier; ++i) {
+void sleep(float multiplier) {
+    for (int i = 0; i < 1000000 * multiplier; ++i) {
         asm("nop");
     }
 }
