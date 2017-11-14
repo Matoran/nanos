@@ -30,7 +30,7 @@ static void scroll() {
  * Print char into the console
  * @param c char we want print
  */
-static void print_char(char c) {
+static void print_char(uchar c) {
     position_t pos = read_cursor();
     *((ushort *) (SCREEN + pos.x * 2 + pos.y * WIDTH * 2)) = (ushort) (c | FOREGROUND_COLOR << 8 |
                                                                        BACKGROUND_COLOR << 12);

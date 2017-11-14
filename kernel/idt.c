@@ -4,6 +4,7 @@
 #include "../common/console.h"
 #include "pic.h"
 #include "keyboard.h"
+#include "timer.h"
 
 // CPU context used when saving/restoring context from an interrupt
 typedef struct regs_st {
@@ -38,8 +39,9 @@ void exception_handler(regs_t *regs) {
 }
 
 void irq_handler(regs_t *regs) {
-    printf("irq");
     switch (regs->number){
+		case 0:
+			timer_handler();
         case 1:
             keyboard_handler();
             break;
