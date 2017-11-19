@@ -7,6 +7,7 @@
 
 #include "console_tests.h"
 #include "../common/console.h"
+#include "timer.h"
 
 /**
  * Test the scroll
@@ -15,13 +16,13 @@ static void scroll() {
     for (int i = 0; i < 30; ++i) {
         printf("%d\n", i);
         if (i > 20) {
-            sleep(1);
+            sleep(1000);
         }
     }
     for (int j = 0; j < WIDTH + 2; ++j) {
         printf("a");
         if (j >= WIDTH - 3) {
-            sleep(2);
+            sleep(1000);
         }
     }
 }
@@ -70,16 +71,22 @@ static void checkerboard_zoom(int size) {
     printf("checkerboard zooming");
 }
 
+/**
+ * show 1 character and change color (loop)
+ */
 static void color(){
     while(1){
         for (uchar i = 0; i <= 12; ++i) {
             console_set_background_color(i);
             printf(" ");
-            sleep(0.1);
+            sleep(10);
         }
     }
 }
 
+/**
+ * launch console tests
+ */
 void console_tests() {
     bool black = true;
     position_t pos;
@@ -90,13 +97,13 @@ void console_tests() {
         move_cursor(pos);
         checkerboard_blink(black);
         black = !black;
-        sleep(2);
+        sleep(200);
     }
     console_clear();
     for (int i = 1; i <= HEIGHT; ++i) {
         move_cursor(pos);
         checkerboard_zoom(i);
-        sleep(100);
+        sleep(200);
     }
     move_cursor(pos);
     color();

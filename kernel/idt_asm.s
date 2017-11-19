@@ -1,3 +1,9 @@
+;
+; @authors: LOPES Marco, ISELI Cyril
+; Purpose: create exception/irq handlers and call c handlers
+; Language:  C
+; Date : November 2017
+
 %include "const.inc"
 
 section .text   ; start of the text (code) section

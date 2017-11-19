@@ -11,6 +11,10 @@
 static uchar BACKGROUND_COLOR = COLOR_BLACK;
 static uchar FOREGROUND_COLOR = COLOR_GREEN;
 
+static ushort read_cursor_1D();
+
+static void move_cursor_1D(ushort pos1D);
+
 /**
  * Scroll the graphics console
  */
@@ -32,16 +36,35 @@ static void scroll() {
  */
 static void print_char(uchar c) {
     position_t pos = read_cursor();
-    *((ushort *) (SCREEN + pos.x * 2 + pos.y * WIDTH * 2)) = (ushort) (c | FOREGROUND_COLOR << 8 |
-                                                                       BACKGROUND_COLOR << 12);
-    pos.x++;
-    pos.y = pos.y + (pos.x / WIDTH);
-    pos.x %= WIDTH;
-    if (pos.y >= HEIGHT) {
-        scroll();
+    if (c == '\n') {
+        pos.y++;
+        if (pos.y >= HEIGHT) {
+            scroll();
+        } else {
+            pos.x = 0;
+            move_cursor(pos);
+        }
+    } else if (c == '\b') {
+        ushort pos1D = read_cursor_1D();
+        if (pos1D > 0) {
+            pos1D--;
+            *((ushort *) (SCREEN + pos1D * 2)) = (ushort) (' ' | FOREGROUND_COLOR << 8 |
+                                                           BACKGROUND_COLOR << 12);
+            move_cursor_1D(pos1D);
+        }
     } else {
-        move_cursor(pos);
+        *((ushort *) (SCREEN + pos.x * 2 + pos.y * WIDTH * 2)) = (ushort) (c | FOREGROUND_COLOR << 8 |
+                                                                           BACKGROUND_COLOR << 12);
+        pos.x++;
+        pos.y = pos.y + (pos.x / WIDTH);
+        pos.x %= WIDTH;
+        if (pos.y >= HEIGHT) {
+            scroll();
+        } else {
+            move_cursor(pos);
+        }
     }
+
 }
 
 /**
@@ -152,20 +175,32 @@ void console_set_foreground_color(uchar color) {
     FOREGROUND_COLOR = color;
 }
 
+ushort read_cursor_1D() {
+    ushort pos1D = 0;
+    outb(0x3D4, 0xE);
+    pos1D = inb(0x3D5) << 8;
+    outb(0x3D4, 0xF);
+    pos1D |= inb(0x3D5);
+    return pos1D;
+}
+
 /**
  * Read the cursor position
  * @return position
  */
 position_t read_cursor() {
     position_t pos;
-    ushort pos1D = 0;
-    outb(0x3D4, 0xE);
-    pos1D = inb(0x3D5) << 8;
-    outb(0x3D4, 0xF);
-    pos1D |= inb(0x3D5);
+    ushort pos1D = read_cursor_1D();
     pos.x = pos1D % WIDTH;
     pos.y = pos1D / WIDTH;
     return pos;
+}
+
+void move_cursor_1D(ushort pos1D) {
+    outb(0x3D4, 0xE);
+    outb(0x3D5, (uchar) (pos1D >> 8));
+    outb(0x3D4, 0xF);
+    outb(0x3D5, (uchar) (pos1D));
 }
 
 /**
@@ -173,11 +208,8 @@ position_t read_cursor() {
  * @param position
  */
 void move_cursor(position_t position) {
-    uint16_t pos1D = position.x + position.y * WIDTH;
-    outb(0x3D4, 0xE);
-    outb(0x3D5, (uchar) (pos1D >> 8));
-    outb(0x3D4, 0xF);
-    outb(0x3D5, (uchar) (pos1D));
+    ushort pos1D = position.x + position.y * WIDTH;
+    move_cursor_1D(pos1D);
 }
 
 /**
@@ -196,15 +228,6 @@ void printf(char *fmt, ...) {
     while (*fmt != 0) {
         if (*fmt == '%') {
             var = true;
-        } else if (*fmt == '\n') {
-            position_t pos = read_cursor();
-            pos.y++;
-            if (pos.y >= HEIGHT) {
-                scroll();
-            } else {
-                pos.x = 0;
-                move_cursor(pos);
-            }
         } else {
             if (var) {
                 switch (*fmt) {

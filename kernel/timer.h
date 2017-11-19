@@ -3,6 +3,11 @@
 
 #include "../common/types.h"
 
+#define MAX_FREQ 1193180
+#define MIN_FREQ 19
+#define MAX_DIV 65535
+#define MIN_DIV 1
+
 extern void timer_init(uint32_t freq_hz);
 extern void timer_handler();
 extern uint get_ticks();
