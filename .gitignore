@@ -79,7 +79,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 .idea/
-CMakeLists.txt
 build/
 
 nanos.iso
