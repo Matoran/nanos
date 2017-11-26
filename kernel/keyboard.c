@@ -10,6 +10,8 @@
 #define KEY_SHIFT 42
 #define KEY_SHIFT_LEFT 54
 #define BUFFER_SIZE 10
+#define STATE_REGISTER_KEYBOARD 0x64
+#define DATA_REGISTER_KEYBOARD 0x60
 
 static uchar buffer[BUFFER_SIZE];
 static uchar write = 0;
@@ -59,8 +61,8 @@ void keyboard_init() {
  * save character in buffer if it's a make code
  */
 void keyboard_handler() {
-    if(inb(0x64) & 1){
-        uchar character = inb(0x60);
+    if (inb(STATE_REGISTER_KEYBOARD) & 1) {
+        uchar character = inb(DATA_REGISTER_KEYBOARD);
         if (character >> 7) {
             //break code
             if (character == KEY_SHIFT + 128 || character == KEY_SHIFT_LEFT + 128) {

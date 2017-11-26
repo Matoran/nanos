@@ -45,4 +45,5 @@ entrypoint:
 	jmp .forever
 
 section .stack nobits
-stack resb STACK_SIZE
+resb STACK_SIZE
+stack:

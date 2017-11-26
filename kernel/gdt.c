@@ -8,6 +8,7 @@
 #include "gdt.h"
 #include "x86.h"
 #include "../common/memory.h"
+#include "../common/console.h"
 
 static gdt_entry_t gdt_table[3];
 

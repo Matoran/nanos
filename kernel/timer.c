@@ -7,6 +7,12 @@
 #include "timer.h"
 #include "../common/console.h"
 
+#define MAX_DIV 65535
+#define MIN_DIV 1
+#define COMMAND_REGISTER_PIT 0x43
+#define DATA0_REGISTER_PIT 0x40
+#define LOOP_AND_USE_DIVISOR 0x36
+
 static uint ticks = 0;
 static uint32_t frequency;
 
@@ -26,9 +32,10 @@ void timer_init(uint32_t freq_hz) {
         div = MAX_FREQ / freq_hz;
         frequency = freq_hz;
     }
-    outb(0x43, 0x36);
-    outb(0x40, div & 0xFF);
-    outb(0x40, div >> 8);
+    outb(COMMAND_REGISTER_PIT, LOOP_AND_USE_DIVISOR);
+    outb(DATA0_REGISTER_PIT, div & 0xFF);
+    outb(DATA0_REGISTER_PIT, div >> 8);
+    printf("Timer initialized\n");
 }
 
 /**

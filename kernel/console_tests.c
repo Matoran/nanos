@@ -75,7 +75,7 @@ static void checkerboard_zoom(int size) {
  * show 1 character and change color (loop)
  */
 static void color(){
-    while(1){
+    for (int j = 0; j < 26 * 80 / 12; ++j) {
         for (uchar i = 0; i <= 12; ++i) {
             console_set_background_color(i);
             printf(" ");

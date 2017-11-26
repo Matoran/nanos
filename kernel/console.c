@@ -7,6 +7,10 @@
 #include "../common/console.h"
 #include "../common/memory.h"
 
+#define COMMAND_REGISTER_CRTC 0x3d4
+#define DATA_REGISTER_CRTC 0x3d5
+#define SELECTOR_MSB_CRTC 0xE
+#define SELECTOR_LSB_CRTC 0xF
 #define ALPHABET "0123456789ABCDEF"
 static uchar BACKGROUND_COLOR = COLOR_BLACK;
 static uchar FOREGROUND_COLOR = COLOR_GREEN;
@@ -115,6 +119,8 @@ void console_init() {
     console_set_background_color(COLOR_LIGHT_GRAY);
     console_set_foreground_color(COLOR_RED);
     console_clear();
+    printf("GDT initialized\n");
+    printf("Console initialized\n");
 }
 
 /**
@@ -177,10 +183,10 @@ void console_set_foreground_color(uchar color) {
 
 ushort read_cursor_1D() {
     ushort pos1D = 0;
-    outb(0x3D4, 0xE);
-    pos1D = inb(0x3D5) << 8;
-    outb(0x3D4, 0xF);
-    pos1D |= inb(0x3D5);
+    outb(COMMAND_REGISTER_CRTC, SELECTOR_MSB_CRTC);
+    pos1D = inb(DATA_REGISTER_CRTC) << 8;
+    outb(COMMAND_REGISTER_CRTC, SELECTOR_LSB_CRTC);
+    pos1D |= inb(DATA_REGISTER_CRTC);
     return pos1D;
 }
 
@@ -197,10 +203,10 @@ position_t read_cursor() {
 }
 
 void move_cursor_1D(ushort pos1D) {
-    outb(0x3D4, 0xE);
-    outb(0x3D5, (uchar) (pos1D >> 8));
-    outb(0x3D4, 0xF);
-    outb(0x3D5, (uchar) (pos1D));
+    outb(COMMAND_REGISTER_CRTC, SELECTOR_MSB_CRTC);
+    outb(DATA_REGISTER_CRTC, (uchar) (pos1D >> 8));
+    outb(COMMAND_REGISTER_CRTC, SELECTOR_LSB_CRTC);
+    outb(DATA_REGISTER_CRTC, (uchar) (pos1D));
 }
 
 /**

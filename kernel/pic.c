@@ -33,6 +33,7 @@ void pic_init() {
 	outb(PIC2_DATA, 0x02);
 	outb(PIC1_DATA, 0x01);
 	outb(PIC2_DATA, 0x01);
+	printf("PIC initialized\n");
 }
 
 // Send an end-of-interrupt to the PICs.

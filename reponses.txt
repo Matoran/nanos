@@ -1,0 +1,16 @@
+1. gdt -> console ->  pic -> idt -> timer -> keyboard
+on initialise d'abord la gdt pour exécuter du code kernel
+on initialise la console pour pouvoir afficher les messages d'inits
+on fait le mappage des interruptions
+on crée la table d'interruptions qu'on utilise ensuite pour gérer le timer et le clavier
+l'ordre de pic, idt, timer et keyboard n'a pas d'importance car on active les interruptions uniquement après avoir initialisé le clavier
+
+2. il y aurait un conflit entre les exceptions cpu et les interruptions
+
+3. faire une division par 0
+
+4. 10 c'est largement suffisant dans tous les cas, sauf si on se met à tapper sur 30 touches en même temps ou que la personne tappe pendant un sleep(mais dans ce cas même un buffer de 10000 ne serait pas suffisant).
+
+5. en faisant un sleep et en tappant plein de texte
+
+6. oui, ticks est une valeur 32 bits, il peut donc contenir 4'294'967'296 valeurs. À une fréquence de 100Hz on aura 42'949'672 de secondes maximum, ce qui fait environ 497 jours. Si le timer a été démarré depuis longtemps 496 jours par exemple, et qu'on lui demande d'attendre 10 jours ça ne va pas fonctionner, il ne va en attendre qu'un.

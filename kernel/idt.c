@@ -193,4 +193,5 @@ void idt_init() {
     ptr.base = (uint32_t) idt_table;
     ptr.limit = sizeof(idt_table) - 1;
     idt_load(&ptr);
+    printf("IDT initialized\n");
 }
