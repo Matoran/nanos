@@ -17,6 +17,9 @@ void fs_create(char label[], __uint16_t block_size, char name[], __uint32_t numb
     superblock.version = 0;
     superblock.block_size = block_size;
     superblock.number_of_groups = number_of_groups;
+    superblock.direct = DIRECT_BLOCKS;
+    superblock.single_indirect = block_size / sizeof(inode.blocks[0]);
+    superblock.double_indirect = superblock.single_indirect * superblock.single_indirect;
     FILE * file= fopen(name, "wb");
     if (file != NULL) {
         fwrite(&superblock, sizeof(superblock), 1, file);
@@ -30,15 +33,13 @@ void fs_create(char label[], __uint16_t block_size, char name[], __uint32_t numb
         }
         __uint8_t *block = calloc_error(block_size, sizeof(__uint8_t));
         for (int i = 0; i < number_of_groups; ++i) {
-            memset(block, 0xff, block_size);
             fwrite(block, block_size, 1, file); //inode bitmap
-            memset(block, 0, block_size);
             fwrite(block, block_size, 1, file); //block bitmap
             for (int j = 0; j < block_size * 8; ++j) {
                 fwrite(&inode, sizeof(inode_t), 1, file); //create inode
             }
             for (int j = 0; j < block_size * 8; ++j) {
-               fwrite(block, block_size, 1, file); //create block
+                fwrite(block, block_size, 1, file); //create block
             }
         }
 
