@@ -50,7 +50,7 @@ void fs_create(char label[], uint16_t block_size, char name[], uint16_t number_o
 
 int main(int argc, char *argv[]) {
     if (argc < 5) {
-        printf("arg0 block size needs to be multiple of 512\n");
+        printf("block size needs to be multiple of 512 and maximum 4096\n");
         printf("usage: fs_create <label> <block size> <img name> <number of groups>\n");
         printf("example: fs_create next2 1024 fs.img 1, will create a 8MiB usable blocks\n");
         printf("you can calculate it: block_size^2*8*number_of_groups\n");
@@ -60,9 +60,13 @@ int main(int argc, char *argv[]) {
     uint16_t block_size = atoi(argv[2]);
     char *name = argv[3];
     uint32_t number_of_groups = atoi(argv[4]);
+    if (block_size > 4096) {
+        printf("block size need to be <= 4096\n");
+        exit(2);
+    }
     if (block_size % 512 != 0) {
         printf("block size need to be multiple of 512\n");
-        exit(2);
+        exit(3);
     }
     fs_create(label, block_size, name, number_of_groups);
     return 0;
