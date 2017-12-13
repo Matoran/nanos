@@ -4,7 +4,8 @@
  * Language:  C
  * Date : October/November 2017
  */
-#include "../common/console.h"
+#include "console.h"
+#include "io.h"
 #include "../common/memory.h"
 
 #define COMMAND_REGISTER_CRTC 0x3d4

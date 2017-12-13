@@ -12,7 +12,7 @@ set(SOURCE_FILES
         kernel/memory.c
         common/memory.h
         kernel/console.c
-        common/console.h
+        kernel/console.h
         kernel/kernel.c
         kernel/kernel.h
         kernel/kernel.ld
@@ -28,7 +28,22 @@ set(SOURCE_FILES
         kernel/keyboard.c
         kernel/idt_asm.s
         kernel/idt.c
+        kernel/ide.c
         kernel/timer.c
-        kernel/const.inc)
+        kernel/const.inc kernel/io.h)
 
 add_executable(nanos ${SOURCE_FILES})
+
+set(CMAKE_C_STANDARD 99)
+
+set(SOURCE_FILES tools/fs_create.c tools/structs.h tools/common.c tools/common.h)
+add_executable(fs_create ${SOURCE_FILES})
+
+set(SOURCE_FILES tools/fs_add.c tools/structs.h tools/common.c tools/common.h)
+add_executable(fs_add ${SOURCE_FILES})
+
+set(SOURCE_FILES tools/fs_del.c tools/structs.h tools/common.c tools/common.h)
+add_executable(fs_del ${SOURCE_FILES})
+
+set(SOURCE_FILES tools/fs_list.c tools/structs.h tools/common.c tools/common.h)
+add_executable(fs_list ${SOURCE_FILES})

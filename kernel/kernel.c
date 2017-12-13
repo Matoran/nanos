@@ -8,9 +8,7 @@
 #include "kernel.h"
 #include "gdt.h"
 #include "../common/types.h"
-#include "../common/console.h"
-#include "../common/memory.h"
-#include "console_tests.h"
+#include "console.h"
 #include "idt.h"
 #include "x86.h"
 #include "pic.h"
@@ -34,7 +32,7 @@ void kernel_init(multiboot_info_t *informations) {
     printf("Test mode on\n");
     printf("Tests will be launched soon\n");
     sleep(5000);
-    console_tests();
+    //console_tests();
     printf("sleep 5 seconds\n");
     sleep(5000);
 #else

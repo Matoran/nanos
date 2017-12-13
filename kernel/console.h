@@ -1,7 +1,7 @@
+#include "../common/types.h"
+
 #ifndef NANOS_CONSOLE_H
 #define NANOS_CONSOLE_H
-
-#include "types.h"
 
 #define COLOR_BLACK 0
 #define COLOR_BLUE 1
@@ -29,32 +29,15 @@ typedef struct position_st {
 } position_t;
 
 extern void console_init();
-
 extern void console_clear();
-
 extern uchar console_background_color();
-
 extern void console_set_background_color(uchar color);
-
 extern uchar console_foreground_color();
-
 extern void console_set_foreground_color(uchar color);
-
 extern void sleepOld(float multiplier);
-
 extern position_t read_cursor();
-
 extern void move_cursor(position_t position);
-
 extern void printf(char *fmt, ...);
-
-extern void outb(uint16_t port, uint8_t data);
-
-extern void outw(uint16_t port, uint16_t data);
-
-extern uchar inb(uint16_t port);
-
-extern ushort inw(uint16_t port);
 
 
 #endif

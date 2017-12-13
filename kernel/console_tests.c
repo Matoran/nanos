@@ -6,7 +6,7 @@
  */
 
 #include "console_tests.h"
-#include "../common/console.h"
+#include "console.h"
 #include "timer.h"
 
 /**
@@ -61,9 +61,9 @@ static void checkerboard_zoom(int size) {
     for (int line = 0; line < HEIGHT - 1; ++line) {
         for (int column = 0; column < WIDTH; ++column) {
             if (line / size % 2 == column / size % 2) {
-                console_set_background_color((size-1)%16);
+                console_set_background_color((size - 1) % 16);
             } else {
-                console_set_background_color(15-((size-1)%16));
+                console_set_background_color(15 - ((size - 1) % 16));
             }
             printf(" ");
         }
@@ -74,7 +74,7 @@ static void checkerboard_zoom(int size) {
 /**
  * show 1 character and change color (loop)
  */
-static void color(){
+static void color() {
     for (int j = 0; j < 26 * 80 / 12; ++j) {
         for (uchar i = 0; i <= 12; ++i) {
             console_set_background_color(i);

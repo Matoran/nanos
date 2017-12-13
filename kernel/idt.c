@@ -7,7 +7,7 @@
 #include "idt.h"
 #include "../common/memory.h"
 #include "x86.h"
-#include "../common/console.h"
+#include "console.h"
 #include "pic.h"
 #include "keyboard.h"
 #include "timer.h"

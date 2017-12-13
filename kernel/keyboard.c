@@ -6,7 +6,9 @@
  */
 #include "keyboard.h"
 #include "../common/types.h"
-#include "../common/console.h"
+#include "console.h"
+#include "io.h"
+
 #define KEY_SHIFT 42
 #define KEY_SHIFT_LEFT 54
 #define BUFFER_SIZE 10

@@ -1,20 +1,28 @@
+/**
+ * @authors: LOPES Marco, ISELI Cyril
+ * Purpose: common functions for filesystem tools
+ * Language:  C
+ * Date : December 2017
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "common.h"
 
-void *calloc_error (size_t __nmemb, size_t __size){
+void *calloc_error(size_t __nmemb, size_t __size) {
     int *result = calloc(__nmemb, __size);
-    if(result == NULL){
+    if (result == NULL) {
         printf("error calloc");
         exit(4);
-    }else{
+    } else {
         return result;
     }
 }
 
-__uint32_t inode_id_to_offset(superblock_t sb, __uint32_t inode_id) {
-    __uint16_t group = inode_id / (sb.block_size * 8);
+uint32_t inode_id_to_offset(superblock_t sb, uint32_t inode_id) {
+    uint16_t group = inode_id / (sb.block_size * 8);
     return sb.block_size + //superblock
            sb.block_size * 2 * (group + 1) + //inode bitmap and block bitmap of all groups
            sb.block_size * sizeof(inode_t) * 8 * group + //all previous inode groups
@@ -22,26 +30,36 @@ __uint32_t inode_id_to_offset(superblock_t sb, __uint32_t inode_id) {
            sb.block_size * sb.block_size * 8 * group; //all previous block groups;
 }
 
-void do_action_to_allocated_inode(char *filename, char *img_name,
-                                  void(*function)(char *, __uint32_t, FILE *, superblock_t, long, __uint32_t,
-                                                  __uint8_t)) {
+void do_action_to_allocated_inode(char *filename, char *img_name, Action action) {
     superblock_t sb = {0};
-    inode_t inode = {0};
     FILE *img = fopen(img_name, "r+b");
     if (img != NULL) {
         fread(&sb, sizeof(sb), 1, img);
         //jump superblock
         fseek(img, sb.block_size, SEEK_SET);
-        __uint32_t position = 0;
-        __uint32_t inode_bitmap;
+        uint32_t position = 0;
+        uint32_t inode_bitmap;
         long offset;
-        __uint16_t group = 0;
+        uint16_t group = 0;
         do {
             offset = ftell(img);
             fread(&inode_bitmap, sizeof(inode_bitmap), 1, img);
-            for (__uint8_t i = sizeof(inode_bitmap) * 8; i > 0; --i) {
-                if (inode_bitmap & 1 << i - 1) {
-                    function(filename, position, img, sb, offset, inode_bitmap, i - 1);
+            for (uint8_t i = sizeof(inode_bitmap) * 8; i > 0; --i) {
+                if (inode_bitmap & 1 << (i - 1)) {
+                    switch (action) {
+                        case LIST:
+                            printf("%s\n", get_inode(position, img, sb).name);
+                            fseek(img, offset + sizeof(inode_bitmap), SEEK_SET);
+                            break;
+                        case DELETE:
+                            if (strcmp(filename, get_inode(position, img, sb).name) == 0) {
+                                fseek(img, offset, SEEK_SET);
+                                inode_bitmap = inode_bitmap & ~(1 << (i - 1));
+                                fwrite(&inode_bitmap, sizeof(inode_bitmap), 1, img);
+                                printf("found and deleted\n");
+                            }
+                            break;
+                    }
                 }
                 position++;
             }
@@ -59,7 +77,7 @@ void do_action_to_allocated_inode(char *filename, char *img_name,
     }
 }
 
-inode_t get_inode(__uint32_t position, FILE *img, superblock_t sb) {
+inode_t get_inode(uint32_t position, FILE *img, superblock_t sb) {
     fseek(img, inode_id_to_offset(sb, position), SEEK_SET);
     inode_t inode;
     fread(&inode, sizeof(inode_t), 1, img);

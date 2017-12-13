@@ -5,7 +5,8 @@
  * Date : November 2017
  */
 #include "timer.h"
-#include "../common/console.h"
+#include "console.h"
+#include "io.h"
 
 #define MAX_DIV 65535
 #define MIN_DIV 1

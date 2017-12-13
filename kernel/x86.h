@@ -33,7 +33,7 @@
 #define DB_SYS  0
 
 // kernel code and data selectors in the GDT
-#define ALL_PHYSIC_SPACE			 1048576
+#define ALL_PHYSIC_SPACE             1048576
 #define GDT_KERNEL_CODE_SELECTOR  0x08
 #define GDT_KERNEL_DATA_SELECTOR  0x10
 
@@ -50,7 +50,7 @@ static inline void sti() {
 // Halt the processor.
 // External interrupts wake up the CPU, hence the cli instruction.
 static inline void halt() {
-	while (1) asm volatile("cli\nhlt");
+    while (1) asm volatile("cli\nhlt");
 }
 
 #endif
