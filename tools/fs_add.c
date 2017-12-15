@@ -50,7 +50,7 @@ void fs_add(char filename[], char img_name[]) {
 }
 
 uint32_t find_free_inode(FILE *img, superblock_t superblock) {
-    uint32_t inode_bitmap;
+    uint8_t inode_bitmap;
     uint32_t position = 0;
     uint16_t group = 0;
     bool found = false;
@@ -81,7 +81,7 @@ uint32_t find_free_inode(FILE *img, superblock_t superblock) {
 }
 
 uint32_t find_free_block(FILE *img, superblock_t sb) {
-    uint32_t block_bitmap;
+    uint8_t block_bitmap;
     uint32_t position = 0;
     uint16_t group = 0;
     bool found = false;

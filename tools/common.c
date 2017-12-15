@@ -38,7 +38,7 @@ void do_action_to_allocated_inode(char *filename, char *img_name, Action action)
         //jump superblock
         fseek(img, sb.block_size, SEEK_SET);
         uint32_t position = 0;
-        uint32_t inode_bitmap;
+        uint8_t inode_bitmap;
         long offset;
         uint16_t group = 0;
         do {

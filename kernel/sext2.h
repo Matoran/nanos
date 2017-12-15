@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include "../common/types.h"
+#include "../tools/structs.h"
 
 typedef struct stat_st {
     uint32_t size;

@@ -15,12 +15,13 @@
 typedef struct superblock_st {
     uint16_t signature;
     uint8_t version;
-    char name[252];
+    char name[256];
     uint16_t block_size;
     uint32_t number_of_groups;
     uint32_t direct;
     uint32_t single_indirect;
     uint32_t double_indirect;
+    char padding[235];
 } __attribute__((packed)) superblock_t;
 
 typedef struct inode_st {

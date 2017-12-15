@@ -29,10 +29,12 @@ void fs_create(char label[], uint16_t block_size, char name[], uint16_t number_o
             printf("error superblock is bigger than %d Bytes", block_size);
             exit(3);
         } else {
-            uint8_t *padding_superblock = calloc_error(padding, sizeof(uint8_t));
+            uint8_t padding_superblock[padding];
+            memset(padding_superblock, 0, padding);
             fwrite(padding_superblock, padding, 1, file); //inode bitmap
         }
-        uint8_t *block = calloc_error(block_size, sizeof(uint8_t));
+        uint8_t block[block_size];
+        memset(block, 0, block_size);
         for (uint32_t i = 0; i < number_of_groups; ++i) {
             fwrite(block, block_size, 1, file); //inode bitmap
             fwrite(block, block_size, 1, file); //block bitmap
@@ -43,7 +45,6 @@ void fs_create(char label[], uint16_t block_size, char name[], uint16_t number_o
                 fwrite(block, block_size, 1, file); //create block
             }
         }
-
         fclose(file);
     }
 }

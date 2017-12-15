@@ -1,6 +1,7 @@
 BOOT=build/boot/grub
 KERNEL=build/boot/mykernel.elf
-run: iso qemu
+run: qemu
+debug: qemudebug
 test:
 	make run TEST_MODE=-DTEST
 iso: nanos.iso
@@ -16,7 +17,9 @@ $(KERNEL): $(BOOT) kernel common
 	make -C kernel
 	cp kernel/kernel.elf $(KERNEL)
 qemu: nanos.iso
-	qemu-system-i386 -cdrom nanos.iso
+	qemu-system-i386 -cdrom nanos.iso -hda tools/fs.img -m 256M
+qemudebug: nanos.iso
+	qemu-system-i386 -cdrom nanos.iso -hda tools/fs.img -s -S -m 256M
 clean:
 	rm -f -R build nanos.iso
 	make -C kernel clean

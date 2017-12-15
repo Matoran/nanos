@@ -47,70 +47,70 @@ void exception_handler(regs_t *regs) {
     console_set_foreground_color(COLOR_RED);
     switch (regs->number) {
         case 0:
-            printf("Exception 0 - Divide Error");
+            printf("Exception 0 - Divide Error\n");
             break;
         case 1:
-            printf("Exception 1 - RESERVED");
+            printf("Exception 1 - RESERVED\n");
             break;
         case 2:
-            printf("Exception 2 - NMI Interrupt");
+            printf("Exception 2 - NMI Interrupt\n");
             break;
         case 3:
-            printf("Exception 3 - Breakpoint");
+            printf("Exception 3 - Breakpoint\n");
             break;
         case 4:
-            printf("Exception 4 - Overflow");
+            printf("Exception 4 - Overflow\n");
             break;
         case 5:
-            printf("Exception 5 - BOUND Range Exceeded");
+            printf("Exception 5 - BOUND Range Exceeded\n");
             break;
         case 6:
-            printf("Exception 6 - Invalid Opcode (Undefined Opcode)");
+            printf("Exception 6 - Invalid Opcode (Undefined Opcode)\n");
             break;
         case 7:
-            printf("Exception 7 - Device Not Available (No Math Coprocessor)");
+            printf("Exception 7 - Device Not Available (No Math Coprocessor)\n");
             break;
         case 8:
-            printf("Exception 8 - Double Fault");
+            printf("Exception 8 - Double Fault\n");
             break;
         case 9:
-            printf("Exception 9 - Coprocessor Segment Overrun (reserved)");
+            printf("Exception 9 - Coprocessor Segment Overrun (reserved)\n");
             break;
         case 10:
-            printf("Exception 10 - Invalid TSS");
+            printf("Exception 10 - Invalid TSS\n");
             break;
         case 11:
-            printf("Exception 11 - Segment Not Present");
+            printf("Exception 11 - Segment Not Present\n");
             break;
         case 12:
-            printf("Exception 12 - Stack-Segment Fault");
+            printf("Exception 12 - Stack-Segment Fault\n");
             break;
         case 13:
-            printf("Exception 13 - General Protection");
+            printf("Exception 13 - General Protection\n");
             break;
         case 14:
-            printf("Exception 14 - Page Fault");
+            printf("Exception 14 - Page Fault\n");
             break;
         case 15:
-            printf("Exception 15 - (Intel reserved. Do not use.)");
+            printf("Exception 15 - (Intel reserved. Do not use.)\n");
             break;
         case 16:
-            printf("Exception 16 - x87 FPU Floating-Point Error (Math Fault)");
+            printf("Exception 16 - x87 FPU Floating-Point Error (Math Fault)\n");
             break;
         case 17:
-            printf("Exception 17 - Alignment Check");
+            printf("Exception 17 - Alignment Check\n");
             break;
         case 18:
-            printf("Exception 18 - Machine Check");
+            printf("Exception 18 - Machine Check\n");
             break;
         case 19:
-            printf("Exception 19 - SIMD Floating-Point Exception");
+            printf("Exception 19 - SIMD Floating-Point Exception\n");
             break;
         case 20:
-            printf("Exception 20 - Virtualization Exception");
+            printf("Exception 20 - Virtualization Exception\n");
             break;
         default:
-            printf("Exception 21-31 - Intel reserved. Do not use.");
+            printf("Exception 21-31 - Intel reserved. Do not use.\n");
             break;
     }
     halt();
@@ -127,8 +127,10 @@ void irq_handler(regs_t *regs) {
         case 1:
             keyboard_handler();
             break;
+        case 14:
+            break;
         default:
-            printf("irq handler %d don't exist", regs->number);
+            printf("irq handler %d doesn't exist\n", regs->number);
     }
     pic_eoi(regs->number);
 }
