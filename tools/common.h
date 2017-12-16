@@ -1,7 +1,3 @@
-//
-// Created by matoran on 12/9/17.
-//
-
 #include "structs.h"
 
 #ifndef FS_CREATE_COMMON_H

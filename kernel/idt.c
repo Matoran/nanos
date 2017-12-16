@@ -12,6 +12,8 @@
 #include "keyboard.h"
 #include "timer.h"
 
+static idt_entry_t idt_table[256];
+
 // CPU context used when saving/restoring context from an interrupt
 typedef struct regs_st {
     uint32_t gs, fs, es, ds;
@@ -139,7 +141,6 @@ void irq_handler(regs_t *regs) {
  * create idt table empty fill it with asm functions and finally load the idt table
  */
 void idt_init() {
-    idt_entry_t idt_table[256];
     memset(idt_table, 0, 256 * sizeof(idt_entry_t));
     //cpu exceptions
     idt_table[0] = idt_build_entry(GDT_KERNEL_CODE_SELECTOR, (uint32_t) _exception_0, TYPE_INTERRUPT_GATE, DPL_KERNEL);

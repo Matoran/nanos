@@ -14,9 +14,11 @@ typedef struct stat_st {
 } stat_t;
 
 typedef struct file_iterator_st {
-    uint32_t size;
+    uint32_t inode_id;
+    uint16_t group;
 } file_iterator_t;
 
+extern void sext2_init();
 extern int file_stat(char *filename, stat_t *stat);
 extern bool file_exists(char *filename);
 extern int file_open(char *filename);

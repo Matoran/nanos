@@ -1,16 +1,14 @@
-//
-// Created by matoran on 12/9/17.
-//
-
 #ifndef FS_CREATE_STRUCTS_H
 #define FS_CREATE_STRUCTS_H
 
 
 #include <stdint.h>
 
-#define MAX_LENGTH_NAME 30
+#define MAX_FILENAME_LENGTH 30
 #define NUMBER_OF_BLOCKS 10
 #define DIRECT_BLOCKS (NUMBER_OF_BLOCKS-2)
+#define INDIRECT_BLOCK (NUMBER_OF_BLOCKS-2)
+#define DOUBLE_INDIRECT_BLOCK (NUMBER_OF_BLOCKS-1)
 
 typedef struct superblock_st {
     uint16_t signature;
@@ -25,7 +23,7 @@ typedef struct superblock_st {
 } __attribute__((packed)) superblock_t;
 
 typedef struct inode_st {
-    char name[MAX_LENGTH_NAME];
+    char name[MAX_FILENAME_LENGTH];
     uint32_t size;
     uint32_t blocks[NUMBER_OF_BLOCKS]; // 8 simple indirect, 9 double indirect
 } __attribute__((packed)) inode_t;

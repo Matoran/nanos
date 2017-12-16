@@ -46,13 +46,14 @@ void do_action_to_allocated_inode(char *filename, char *img_name, Action action)
             fread(&inode_bitmap, sizeof(inode_bitmap), 1, img);
             for (uint8_t i = sizeof(inode_bitmap) * 8; i > 0; --i) {
                 if (inode_bitmap & 1 << (i - 1)) {
+                    inode_t inode = get_inode(position, img, sb);
                     switch (action) {
                         case LIST:
-                            printf("%s\n", get_inode(position, img, sb).name);
+                            printf("%s %d\n", inode.name, inode.size);
                             fseek(img, offset + sizeof(inode_bitmap), SEEK_SET);
                             break;
                         case DELETE:
-                            if (strcmp(filename, get_inode(position, img, sb).name) == 0) {
+                            if (strcmp(filename, inode.name) == 0) {
                                 fseek(img, offset, SEEK_SET);
                                 inode_bitmap = inode_bitmap & ~(1 << (i - 1));
                                 fwrite(&inode_bitmap, sizeof(inode_bitmap), 1, img);
