@@ -14,6 +14,9 @@
 #include "pic.h"
 #include "keyboard.h"
 #include "timer.h"
+#include "sext2.h"
+
+
 
 /**
  * Initialise the kernel
@@ -28,6 +31,7 @@ void kernel_init(multiboot_info_t *informations) {
     keyboard_init();
     printf("RAM %dKB\n", informations->mem_upper);
     sti();
+    sext2_init();
 #ifdef TEST
     printf("Test mode on\n");
     printf("Tests will be launched soon\n");

@@ -8,36 +8,59 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <string.h>
+#include <memory.h>
 #include "common.h"
 
-void *calloc_error(size_t __nmemb, size_t __size) {
-    int *result = calloc(__nmemb, __size);
-    if (result == NULL) {
-        printf("error calloc");
-        exit(4);
-    } else {
-        return result;
+/**
+ * check signature of filesystem
+ * @param sb superblock_t
+ * @return true if signature is sext2, false otherwise
+ */
+bool check_signature(superblock_t *sb) {
+    return sb->signature == SIGNATURE;
+}
+
+/**
+ * check signature of filesystem and exit if not sext2 format
+ * @param sb superblock_t
+ */
+void check_signature_and_crash_if_not_correct(superblock_t *sb) {
+    if (!check_signature(sb)) {
+        printf("signature of img doesn't correspond with sext2\n");
+        exit(EXIT_FAILURE);
     }
 }
 
-uint32_t inode_id_to_offset(superblock_t sb, uint32_t inode_id) {
-    uint16_t group = inode_id / (sb.block_size * 8);
-    return sb.block_size + //superblock
-           sb.block_size * 2 * (group + 1) + //inode bitmap and block bitmap of all groups
-           sb.block_size * sizeof(inode_t) * 8 * group + //all previous inode groups
+/**
+ * calculate offset of an inode id in the file
+ * @param sb superblock_t
+ * @param inode_id
+ * @return absolute offset
+ */
+uint32_t inode_id_to_offset(superblock_t *sb, uint32_t inode_id) {
+    uint16_t group = inode_id / (sb->block_size * 8);
+    return sb->block_size + //superblock
+           sb->block_size * 2 * (group + 1) + //inode bitmap and block bitmap of all groups
+           sb->block_size * sizeof(inode_t) * 8 * group + //all previous inode groups
            inode_id * sizeof(inode_t) + //jump to current inode
-           sb.block_size * sb.block_size * 8 * group; //all previous block groups;
+           sb->block_size * sb->block_size * 8 * group; //all previous block groups;
 }
 
+/**
+ * do action on allocated inodes
+ * @param filename optional param, send NULL if LIST, filename et it's for delete file
+ * @param img_name filesystem image name
+ * @param action LIST or DELETE
+ */
 void do_action_to_allocated_inode(char *filename, char *img_name, Action action) {
     superblock_t sb = {0};
     FILE *img = fopen(img_name, "r+b");
     if (img != NULL) {
         fread(&sb, sizeof(sb), 1, img);
+        check_signature_and_crash_if_not_correct(&sb);
         //jump superblock
         fseek(img, sb.block_size, SEEK_SET);
-        uint32_t position = 0;
+        uint32_t inode_id = 0;
         uint8_t inode_bitmap;
         long offset;
         uint16_t group = 0;
@@ -46,7 +69,7 @@ void do_action_to_allocated_inode(char *filename, char *img_name, Action action)
             fread(&inode_bitmap, sizeof(inode_bitmap), 1, img);
             for (uint8_t i = sizeof(inode_bitmap) * 8; i > 0; --i) {
                 if (inode_bitmap & 1 << (i - 1)) {
-                    inode_t inode = get_inode(position, img, sb);
+                    inode_t inode = get_inode(inode_id, img, &sb);
                     switch (action) {
                         case LIST:
                             printf("%s %d\n", inode.name, inode.size);
@@ -62,9 +85,9 @@ void do_action_to_allocated_inode(char *filename, char *img_name, Action action)
                             break;
                     }
                 }
-                position++;
+                inode_id++;
             }
-            if (position % sb.block_size * 8 == 0) {
+            if (inode_id % sb.block_size * 8 == 0) {
                 if (group < sb.number_of_groups - 1) {
                     group++;
                     //block bitmap + inode blocks + blocks
@@ -78,8 +101,15 @@ void do_action_to_allocated_inode(char *filename, char *img_name, Action action)
     }
 }
 
-inode_t get_inode(uint32_t position, FILE *img, superblock_t sb) {
-    fseek(img, inode_id_to_offset(sb, position), SEEK_SET);
+/**
+ *
+ * @param inode_id
+ * @param img
+ * @param sb
+ * @return
+ */
+inode_t get_inode(uint32_t inode_id, FILE *img, superblock_t *sb) {
+    fseek(img, inode_id_to_offset(sb, inode_id), SEEK_SET);
     inode_t inode;
     fread(&inode, sizeof(inode_t), 1, img);
     return inode;

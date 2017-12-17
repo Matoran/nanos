@@ -133,9 +133,6 @@ int file_read(int fd, void *buf, uint count) {
         return -1;
     }
     inode_t inode = read_inode(file_descriptor.inode_id);
-    if (inode.size < file_descriptor.offset + count) {
-        return -1;
-    }
     uint32_t total_left = MIN(inode.size - file_descriptor.offset, count);
     uint32_t read = total_left;
     uint32_t buffer_offset = 0;
@@ -191,6 +188,10 @@ uint32_t bmap(inode_t *inode, uint32_t block_id) {
 
 int file_seek(int fd, uint offset) {
     if (!fds.fds[fd].open) {
+        return -1;
+    }
+    inode_t inode = read_inode(fds.fds[fd].inode_id);
+    if (offset > inode.size) {
         return -1;
     }
     fds.fds[fd].offset = offset;
@@ -254,5 +255,4 @@ void file_next(char *filename, file_iterator_t *it) {
         }
         it->group++;
     } while (it->group < sb.number_of_groups);
-
 }

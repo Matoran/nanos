@@ -12,8 +12,8 @@ int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("usage: fs_list <img>\n");
         printf("example: fs_list fs.img\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     do_action_to_allocated_inode(NULL, argv[1], LIST);
-    return 0;
+    return EXIT_SUCCESS;
 }

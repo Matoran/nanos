@@ -9,6 +9,9 @@
 #define DIRECT_BLOCKS (NUMBER_OF_BLOCKS-2)
 #define INDIRECT_BLOCK (NUMBER_OF_BLOCKS-2)
 #define DOUBLE_INDIRECT_BLOCK (NUMBER_OF_BLOCKS-1)
+#define SIGNATURE 0x5E72
+#define MAX_BLOCK_SIZE 4096
+#define MIN_BLOCK_SIZE 512
 
 typedef struct superblock_st {
     uint16_t signature;
@@ -19,7 +22,9 @@ typedef struct superblock_st {
     uint32_t direct;
     uint32_t single_indirect;
     uint32_t double_indirect;
-    char padding[235];
+    uint32_t free_inodes;
+    uint32_t free_blocks;
+    char padding[227];
 } __attribute__((packed)) superblock_t;
 
 typedef struct inode_st {
