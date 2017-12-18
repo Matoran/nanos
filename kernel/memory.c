@@ -57,12 +57,13 @@ int strncmp(const char *p, const char *q, uint n) {
 }
 
 int strcmp(const char *p, const char *q) {
-    while (*p != '\0') {
-        if (*p++ > *q++) {
-            return 1;
-        } else if (*p++ < *q++) {
-            return -1;
+    while (*p == *q) {
+        if (*p == '\0') {
+            return 0;
         }
+        p++;
+        q++;
     }
-    return 0;
+    return *p > *q ? 1 : -1;
+
 }
