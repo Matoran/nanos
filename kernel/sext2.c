@@ -88,21 +88,21 @@ inode_t read_inode(uint32_t inode_id) {
 
     uint16_t group = inode_id / (sb.block_size * 8);
 
-    uint32_t block_id = 1 +
+    uint32_t offset = sb.block_size * (1 +
                         2 * (group + 1) + //inode bitmap and block bitmap of groups
-                        sb.block_size * 8 * group + //blocks of previous groups
-                        inode_id * sizeof(inode_t) / sb.block_size;
+                                       sb.block_size * 8 * group) + //blocks of previous groups
+                      inode_id * sizeof(inode_t);
+    uint32_t block_id = offset / sb.block_size;
     read_block(block_id, inode_block);
     read_block(block_id + 1, inode_block + sb.block_size);
-    inode_id %= (sb.block_size * 8);
     inode_t result = {0};
-    memcpy(&result, inode_block + sizeof(inode_t) * inode_id, sizeof(inode_t));
+    memcpy(&result, inode_block + offset % sb.block_size, sizeof(inode_t));
     return result;
 }
 
 
 bool file_exists(char *filename) {
-    return file_inode_id(filename) == 0;
+    return file_inode_id(filename) != 0;
 }
 
 int file_open(char *filename) {
@@ -221,8 +221,9 @@ bool file_has_next(file_iterator_t *it) {
     do {
         uint32_t block_id = block_id_inode_bitmap_from_group(it->group);
         read_block(block_id, inode_bitmap_block);
-        for (uint16_t j = it->inode_id / 8; j < sizeof(inode_bitmap_block); ++j) {
-            inode_bitmap = inode_bitmap_block[j];
+        uint16_t index_in_block = it->inode_id % (sb.block_size * 8) / 8;
+        for (; index_in_block < sizeof(inode_bitmap_block); ++index_in_block) {
+            inode_bitmap = inode_bitmap_block[index_in_block];
             for (uint8_t i = sizeof(inode_bitmap) * 8 - it->inode_id % 8; i > 0; --i) {
                 if (inode_bitmap & 1 << (i - 1)) {
                     return true;
@@ -241,13 +242,15 @@ void file_next(char *filename, file_iterator_t *it) {
     do {
         uint32_t block_id = block_id_inode_bitmap_from_group(it->group);
         read_block(block_id, inode_bitmap_block);
-        for (uint16_t j = it->inode_id / 8; j < sizeof(inode_bitmap_block); ++j) {
-            inode_bitmap = inode_bitmap_block[j];
+        uint16_t index_in_block = it->inode_id % (sb.block_size * 8) / 8;
+        for (; index_in_block < sizeof(inode_bitmap_block); ++index_in_block) {
+            inode_bitmap = inode_bitmap_block[index_in_block];
             for (uint8_t i = sizeof(inode_bitmap) * 8 - it->inode_id % 8; i > 0; --i) {
                 if (inode_bitmap & 1 << (i - 1)) {
                     inode_t inode = read_inode(it->inode_id + 1);
                     memcpy(filename, inode.name, MAX_FILENAME_LENGTH);
                     it->inode_id++;
+                    it->group = it->inode_id / (sb.block_size * 8);
                     return;
                 }
                 it->inode_id++;

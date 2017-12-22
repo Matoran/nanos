@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <libgen.h>
 #include "structs.h"
 #include "common.h"
 
@@ -38,7 +39,7 @@ void fs_add(char filename[], char img_name[]) {
         check_space_and_crash_if_not_enough(&sb, filename);
         uint32_t inode_id = find_free_inode(img, &sb);
         int offset = inode_id_to_offset(&sb, inode_id);
-        strcpy(inode.name, filename);
+        strcpy(inode.name, basename(filename));
         uint8_t block[sb.block_size];
         memset(block, 0, sb.block_size);
         int result;
@@ -130,7 +131,7 @@ uint32_t find_free_inode(FILE *img, superblock_t *sb) {
                 break;
             }
         }
-        if (inode_id % sb->block_size * 8 == 0) {
+        if (inode_id % (sb->block_size * 8) == 0) {
             if (group < sb->number_of_groups) {
                 group++;
                 //block bitmap + inode blocks + blocks
@@ -288,6 +289,10 @@ int main(int argc, char *argv[]) {
     if (argc < 3) {
         printf("usage: fs_add <file> <img>\n");
         printf("example: fs_add tetris fs.img\n");
+        exit(EXIT_FAILURE);
+    }
+    if (do_action_to_allocated_inode(basename(argv[1]), argv[2], EXISTS)) {
+        printf("file already exist\n");
         exit(EXIT_FAILURE);
     }
     fs_add(argv[1], argv[2]);
