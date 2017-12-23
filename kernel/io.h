@@ -1,7 +1,3 @@
-//
-// Created by matoran on 12/13/17.
-//
-
 #ifndef NANOS_IO_H
 #define NANOS_IO_H
 
