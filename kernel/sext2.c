@@ -1,72 +1,39 @@
-//
-// Created by matoran on 12/13/17.
-//
+/**
+ * @authors: LOPES Marco, ISELI Cyril
+ * Purpose: "driver" for filesystem simple ext2
+ * Language:  C
+ * Date : December 2017
+ */
 
 
 #include "sext2.h"
 #include "ide.h"
 #include "../common/memory.h"
 #include "console.h"
+#include "sext2_private.h"
 
 #define MIN(a, b) (((a)<(b))?(a):(b))
 #define MAX(a, b) (((a)>(b))?(a):(b))
 
-
-#define MAX_FDS 256
-
-typedef struct file_descriptor_st {
-    bool open;
-    uint32_t inode_id;
-    uint32_t offset;
-} file_descriptor_t;
-
-typedef struct file_descriptors_st {
-    file_descriptor_t fds[MAX_FDS];
-    uint8_t free_fds[MAX_FDS];
-    uint16_t last_fds_open;
-    uint16_t number_free_fds;
-} file_descriptors_t;
-
-
 static superblock_t sb;
 static file_descriptors_t fds = {0};
 
-
-inode_t read_inode(uint32_t inode_id);
-
-uint32_t bmap(inode_t *inode, uint32_t block_id);
-
+/**
+ * read superblock and init private section
+ */
 void sext2_init() {
-    read_sector(0, &sb);
-}
-
-void read_block(int block, uint8_t *dst) {
-    for (int j = 0; j < sb.block_size / SECTOR_SIZE; ++j) {
-        int block_id = block * sb.block_size / SECTOR_SIZE + j;
-        int index = SECTOR_SIZE * j;
-        read_sector(block_id, dst + index);
-    }
+    uint8_t superblock[MIN_BLOCK_SIZE];
+    read_sector(0, superblock);
+    memcpy(&sb, superblock, sizeof(sb));
+    sext2_private_init(&sb);
 }
 
 /**
- * search inode id of a file (inode id is 1-indexed)
- * @param filename filename to search
- * @return inode id or 0 if file doesn't exist
+ * read some informations of a file
+ * @param filename to stat
+ * @param stat stat_t pointer previously declared
+ * @return -1 if file doesn't exist 0 otherwise
  */
-uint32_t file_inode_id(char *filename) {
-    char result[MAX_FILENAME_LENGTH];
-    file_iterator_t it = file_iterator();
-
-    while (file_has_next(&it)) {
-        file_has_next(&it);
-        file_next(result, &it);
-        if (strcmp(filename, result) == 0) {
-            return it.inode_id;
-        }
-    }
-    return 0;
-}
-
 int file_stat(char *filename, stat_t *stat) {
     uint32_t inode_id = file_inode_id(filename);
     if (!inode_id) {
@@ -78,33 +45,19 @@ int file_stat(char *filename, stat_t *stat) {
 }
 
 /**
- * read inode from an id (1-indexed)
- * @param inode_id inode number
- * @return inode
+ * check if file exists
+ * @param filename
+ * @return bool
  */
-inode_t read_inode(uint32_t inode_id) {
-    inode_id--;
-    uint8_t inode_block[sb.block_size * 2]; //some inodes are into two blocks
-
-    uint16_t group = inode_id / (sb.block_size * 8);
-
-    uint32_t offset = sb.block_size * (1 +
-                        2 * (group + 1) + //inode bitmap and block bitmap of groups
-                                       sb.block_size * 8 * group) + //blocks of previous groups
-                      inode_id * sizeof(inode_t);
-    uint32_t block_id = offset / sb.block_size;
-    read_block(block_id, inode_block);
-    read_block(block_id + 1, inode_block + sb.block_size);
-    inode_t result = {0};
-    memcpy(&result, inode_block + offset % sb.block_size, sizeof(inode_t));
-    return result;
-}
-
-
 bool file_exists(char *filename) {
     return file_inode_id(filename) != 0;
 }
 
+/**
+ * open file if exist return -1 otherwise
+ * @param filename to open
+ * @return file descriptor or -1 if error
+ */
 int file_open(char *filename) {
     uint32_t inode_id = file_inode_id(filename);
     if (!inode_id) {
@@ -127,6 +80,13 @@ int file_open(char *filename) {
     return -1;
 }
 
+/**
+ * read from a file count bytes and write it on buffer
+ * @param fd file descriptor
+ * @param buf buffer to write
+ * @param count number of byte to write
+ * @return -1 if error, number of bytes really read otherwise
+ */
 int file_read(int fd, void *buf, uint count) {
     file_descriptor_t file_descriptor = fds.fds[fd];
     if (!file_descriptor.open) {
@@ -153,39 +113,12 @@ int file_read(int fd, void *buf, uint count) {
     return read;
 }
 
-uint32_t bmap(inode_t *inode, uint32_t block_id) {
-    if (block_id < sb.direct) {
-        return inode->blocks[block_id];
-    }
-    if (inode->blocks[INDIRECT_BLOCK] == 0) {
-        return 0;
-    }
-    block_id -= sb.direct;
-    if (block_id < sb.single_indirect) {
-        uint8_t block[sb.block_size];
-        read_block(inode->blocks[INDIRECT_BLOCK], block);
-        memcpy(&block_id, &block[block_id], sizeof(block_id));
-        return block_id;
-    }
-    if (inode->blocks[DOUBLE_INDIRECT_BLOCK] == 0) {
-        return 0;
-    }
-    block_id -= sb.single_indirect;
-    if (block_id < sb.double_indirect) {
-        uint8_t block[sb.block_size];
-        read_block(inode->blocks[DOUBLE_INDIRECT_BLOCK], block);
-        uint32_t double_indirect;
-        memcpy(&double_indirect, &block[block_id / sb.single_indirect], sizeof(double_indirect));
-        if (double_indirect) {
-            return 0;
-        }
-        read_block(double_indirect, block);
-        memcpy(&block_id, &block[block_id % sb.single_indirect], sizeof(block_id));
-        return block_id;
-    }
-    return 0;
-}
-
+/**
+ * change offset of file descriptor to offset
+ * @param fd file descriptor
+ * @param offset new offset of the file
+ * @return -1 if error, new offset otherwise
+ */
 int file_seek(int fd, uint offset) {
     if (!fds.fds[fd].open) {
         return -1;
@@ -198,23 +131,29 @@ int file_seek(int fd, uint offset) {
     return offset;
 }
 
+/**
+ * close file and free file descriptor
+ * @param fd file descriptor
+ */
 void file_close(int fd) {
     memset(&fds.fds[fd], 0, sizeof(file_descriptor_t));
     fds.free_fds[fds.number_free_fds++] = fd;
 }
 
+/**
+ * create a new file iterator
+ * @return file_iterator_t
+ */
 file_iterator_t file_iterator() {
     file_iterator_t file = {0};
     return file;
 }
 
-uint32_t block_id_inode_bitmap_from_group(uint16_t group) {
-    return 1 +
-           group * 2 + //inode bitmap and block bitmap previous groups
-           sizeof(inode_t) * 8 * group + //inodes of previous groups
-           sb.block_size * 8 * group; // blocks of previous groups
-}
-
+/**
+ * check if file iterator has a next file
+ * @param it file_iterator_t
+ * @return bool
+ */
 bool file_has_next(file_iterator_t *it) {
     uint8_t inode_bitmap_block[sb.block_size];
     uint8_t inode_bitmap;
@@ -236,6 +175,11 @@ bool file_has_next(file_iterator_t *it) {
     return false;
 }
 
+/**
+ * copy inode name to filename
+ * @param filename buffer previously declared
+ * @param it file_iterator_t
+ */
 void file_next(char *filename, file_iterator_t *it) {
     uint8_t inode_bitmap_block[sb.block_size];
     uint8_t inode_bitmap;

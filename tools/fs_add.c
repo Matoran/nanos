@@ -16,17 +16,19 @@
 #include "common.h"
 
 
-void find_block_and_write(uint8_t *block, FILE *img, superblock_t *sb, inode_t *inode, uint32_t block_number);
-uint32_t find_free_inode(FILE *img, superblock_t *sb);
-void read_block(uint32_t block_number, superblock_t *sb, FILE *img, void *dst);
-void goto_block_id(FILE *img, uint32_t block_id, superblock_t *sb);
-void write_block(uint32_t block_number, uint8_t *block, superblock_t *sb, FILE *img);
-void check_space_and_crash_if_not_enough(superblock_t *sb, char *filename);
+static void fs_add(char filename[], char img_name[]);
+static void check_space_and_crash_if_not_enough(superblock_t *sb, char *filename);
+static uint32_t find_free_inode(FILE *img, superblock_t *sb);
+static uint32_t find_free_block(FILE *img, superblock_t *sb);
+static void find_block_and_write(uint8_t *block, FILE *img, superblock_t *sb, inode_t *inode, uint32_t block_number);
+static void read_block(uint32_t block_id, void *dst, superblock_t *sb, FILE *img);
+static void write_block(uint32_t block_id, uint8_t *block, superblock_t *sb, FILE *img);
+static void goto_block_id(uint32_t block_id, superblock_t *sb, FILE *img);
 
 /**
- *
- * @param filename
- * @param img_name
+ * add a file into the filesystem
+ * @param filename file to be add
+ * @param img_name img where append file
  */
 void fs_add(char filename[], char img_name[]) {
     superblock_t sb = {0};
@@ -41,14 +43,12 @@ void fs_add(char filename[], char img_name[]) {
         int offset = inode_id_to_offset(&sb, inode_id);
         strcpy(inode.name, basename(filename));
         uint8_t block[sb.block_size];
-        memset(block, 0, sb.block_size);
-        int result;
+        size_t result;
         int i = 0;
         while ((result = fread(block, 1, sb.block_size, file))) {
             inode.size += result;
             find_block_and_write(block, img, &sb, &inode, i++);
         }
-
         fseek(img, offset, SEEK_SET);
         fwrite(&inode, sizeof(inode), 1, img);
         fseek(img, 0, SEEK_SET);
@@ -61,7 +61,7 @@ void fs_add(char filename[], char img_name[]) {
 }
 
 /**
- *
+ * check if a file can be write on img (inodes, blocks)
  * @param sb
  * @param filename
  */
@@ -75,6 +75,7 @@ void check_space_and_crash_if_not_enough(superblock_t *sb, char *filename) {
     stat(filename, &st);
 
     uint32_t blocks = st.st_size / sb->block_size;
+    //count the real blocks number
     if (st.st_size % sb->block_size != 0) {
         blocks += 1;
     }
@@ -84,6 +85,7 @@ void check_space_and_crash_if_not_enough(superblock_t *sb, char *filename) {
     if (blocks > sb->single_indirect + DIRECT_BLOCKS + 1) {
         blocks += 1 + sb->single_indirect;
     }
+    //if file cannot be into an inode
     if (st.st_size > (sb->direct + sb->single_indirect + sb->double_indirect) * sb->block_size) {
         printf("this file is too big for this filesystem\n");
         uint32_t min_block_size = st.st_size / (sb->direct + sb->single_indirect + sb->double_indirect);
@@ -105,10 +107,10 @@ void check_space_and_crash_if_not_enough(superblock_t *sb, char *filename) {
 }
 
 /**
- *
- * @param img
- * @param sb
- * @return
+ * find free inode in filesystem
+ * @param img filesystem img
+ * @param sb superblock
+ * @return free inode id 0-indexed
  */
 uint32_t find_free_inode(FILE *img, superblock_t *sb) {
     uint8_t inode_bitmap;
@@ -143,10 +145,10 @@ uint32_t find_free_inode(FILE *img, superblock_t *sb) {
 }
 
 /**
- *
- * @param img
- * @param sb
- * @return
+ * find free block in filesystem
+ * @param img filesystem img
+ * @param sb superblock
+ * @return global block id 0-indexed you can directly call write_block(id, data, ...)
  */
 uint32_t find_free_block(FILE *img, superblock_t *sb) {
     uint8_t block_bitmap;
@@ -177,20 +179,19 @@ uint32_t find_free_block(FILE *img, superblock_t *sb) {
             }
         }
     } while (!found);
-    return (sb->block_size + //superblock
-            sb->block_size * 2 * (group + 1) + //inode bitmap and block bitmap of all groups
-            sb->block_size * sizeof(inode_t) * 8 * (group + 1) +  //inodes of all groups
-            //sb->block_size*sb->block_size*8*group + //all blocks of previous groups
-            sb->block_size * block_id) / sb->block_size; //jump to current block
+    return 1 + //superblock
+           2 * (group + 1) + //inode bitmap and block bitmap of all groups
+           sizeof(inode_t) * 8 * (group + 1) +  //inodes of all groups
+           block_id; //jump to current block
 }
 
 /**
- *
- * @param block
- * @param img
- * @param sb
- * @param inode
- * @param block_number
+ * with the block number check if it's a direct, single indirect and double indirect
+ * @param block block data
+ * @param img filesystem img
+ * @param sb superblock
+ * @param inode inode information
+ * @param block_number current block data
  */
 void find_block_and_write(uint8_t *block, FILE *img, superblock_t *sb, inode_t *inode, uint32_t block_number) {
     //direct
@@ -209,7 +210,7 @@ void find_block_and_write(uint8_t *block, FILE *img, superblock_t *sb, inode_t *
         }
         uint32_t indirect_block[sb->block_size / sizeof(inode->blocks[0])];
 
-        read_block(inode->blocks[INDIRECT_BLOCK], sb, img, indirect_block);
+        read_block(inode->blocks[INDIRECT_BLOCK], indirect_block, sb, img);
         indirect_block[block_number] = find_free_block(img, sb);
         write_block(inode->blocks[INDIRECT_BLOCK], (uint8_t *) indirect_block, sb, img);
 
@@ -226,14 +227,14 @@ void find_block_and_write(uint8_t *block, FILE *img, superblock_t *sb, inode_t *
 
         uint32_t indirect_block[sb->block_size / sizeof(inode->blocks[0])];
 
-        read_block(inode->blocks[DOUBLE_INDIRECT_BLOCK], sb, img, indirect_block);
+        read_block(inode->blocks[DOUBLE_INDIRECT_BLOCK], indirect_block, sb, img);
         if (indirect_block[block_number / sb->single_indirect] == 0) {
             indirect_block[block_number / sb->single_indirect] = find_free_block(img, sb);
             write_block(inode->blocks[DOUBLE_INDIRECT_BLOCK], (uint8_t *) indirect_block, sb, img);
         }
         uint32_t double_indirect_block[sb->block_size / sizeof(inode->blocks[0])];
 
-        read_block(indirect_block[block_number / sb->single_indirect], sb, img, double_indirect_block);
+        read_block(indirect_block[block_number / sb->single_indirect], double_indirect_block, sb, img);
         double_indirect_block[block_number % sb->single_indirect] = find_free_block(img, sb);
         write_block(indirect_block[block_number / sb->single_indirect], (uint8_t *) double_indirect_block, sb, img);
 
@@ -243,47 +244,45 @@ void find_block_and_write(uint8_t *block, FILE *img, superblock_t *sb, inode_t *
 }
 
 /**
- *
- * @param block_number
- * @param block
- * @param sb
- * @param img
+ * write block to block id in filesystem img
+ * @param block_id global id of the block 0-indexed (0 = superblock)
+ * @param block block data
+ * @param sb superblock
+ * @param img filesystem img
  */
-void write_block(uint32_t block_number, uint8_t *block, superblock_t *sb, FILE *img) {
-    goto_block_id(img, block_number, sb);
+void write_block(uint32_t block_id, uint8_t *block, superblock_t *sb, FILE *img) {
+    goto_block_id(block_id, sb, img);
     fwrite(block, sb->block_size, 1, img);
 }
 
 
 /**
- *
- * @param block_number
- * @param sb
- * @param img
- * @param block
+ * read block id to block in filesystem img
+ * @param block_id global id of the block 0-indexed (0 = superblock)
+ * @param block buffer previously created
+ * @param sb superblock
+ * @param img filesystem img
  */
-void read_block(uint32_t block_number, superblock_t *sb, FILE *img, void *block) {
-    goto_block_id(img, block_number, sb);
+void read_block(uint32_t block_id, void *block, superblock_t *sb, FILE *img) {
+    goto_block_id(block_id, sb, img);
     fread(block, sb->block_size, 1, img);
 }
 
 /**
- *
- * @param img
- * @param block_id
- * @param sb
+ * goto block id in filesystem img
+ * @param block_id global id of the block 0-indexed (0 = superblock)
+ * @param sb superblock
+ * @param img filesystem img
  */
-void goto_block_id(FILE *img, uint32_t block_id, superblock_t *sb) {
-    if (fseek(img, block_id * sb->block_size, SEEK_SET) == -1) {
-        printf("Error %s \n", strerror(errno));
-    }
+void goto_block_id(uint32_t block_id, superblock_t *sb, FILE *img) {
+    fseek(img, block_id * sb->block_size, SEEK_SET);
 }
 
 /**
- *
- * @param argc
- * @param argv
- * @return
+ * add a file to filesystem if not already present
+ * @param argc arguments count
+ * @param argv arguments
+ * @return EXIT_SUCCESS or EXIT_FAILURE
  */
 int main(int argc, char *argv[]) {
     if (argc < 3) {

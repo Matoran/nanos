@@ -1,5 +1,3 @@
-
-
 #ifndef FS_CREATE_COMMON_H
 #define FS_CREATE_COMMON_H
 

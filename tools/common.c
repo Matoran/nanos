@@ -47,9 +47,9 @@ uint32_t inode_id_to_offset(superblock_t *sb, uint32_t inode_id) {
 
 /**
  * do action on allocated inodes
- * @param filename optional param, send NULL if LIST, filename if it's for delete file
+ * @param filename optional param, send NULL if LIST, filename otherwise
  * @param img_name filesystem image name
- * @param action LIST or DELETE
+ * @param action LIST, DELETE or EXISTS
  */
 bool do_action_to_allocated_inode(char *filename, char *img_name, Action action) {
     superblock_t sb = {0};
@@ -109,11 +109,11 @@ bool do_action_to_allocated_inode(char *filename, char *img_name, Action action)
 }
 
 /**
- *
- * @param inode_id
- * @param img
- * @param sb
- * @return
+ * read inode from filesystem
+ * @param inode_id inode to read 0-indexed
+ * @param img filesystem img
+ * @param sb superblock
+ * @return inode
  */
 inode_t get_inode(uint32_t inode_id, FILE *img, superblock_t *sb) {
     fseek(img, inode_id_to_offset(sb, inode_id), SEEK_SET);

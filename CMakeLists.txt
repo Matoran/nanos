@@ -30,7 +30,7 @@ set(SOURCE_FILES
         kernel/idt.c
         kernel/ide.c
         kernel/timer.c
-        kernel/const.inc kernel/io.h kernel/sext2.c kernel/sext2.h)
+        kernel/const.inc kernel/io.h kernel/sext2.c kernel/sext2.h kernel/sext2_private.c kernel/sext2_private.h)
 
 add_executable(nanos ${SOURCE_FILES})
 

@@ -12,11 +12,12 @@
 #define SIGNATURE 0x5E72
 #define MAX_BLOCK_SIZE 4096
 #define MIN_BLOCK_SIZE 512
+#define MAX_LABEL_LENGTH 256
 
 typedef struct superblock_st {
     uint16_t signature;
     uint8_t version;
-    char name[256];
+    char name[MAX_LABEL_LENGTH];
     uint16_t block_size;
     uint32_t number_of_groups;
     uint32_t direct;
@@ -24,7 +25,6 @@ typedef struct superblock_st {
     uint32_t double_indirect;
     uint32_t free_inodes;
     uint32_t free_blocks;
-    char padding[227];
 } __attribute__((packed)) superblock_t;
 
 typedef struct inode_st {

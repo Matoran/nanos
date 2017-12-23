@@ -9,8 +9,14 @@
 #include <string.h>
 #include <zconf.h>
 #include "structs.h"
-#include "common.h"
 
+/**
+ * create filesystem img
+ * @param label label ot the disk
+ * @param block_size block size
+ * @param name name of the filesystem img
+ * @param number_of_groups number of groups in the filesystem
+ */
 void fs_create(char label[], uint16_t block_size, char name[], uint16_t number_of_groups) {
     superblock_t superblock = {0};
     inode_t inode = {0};
@@ -31,11 +37,10 @@ void fs_create(char label[], uint16_t block_size, char name[], uint16_t number_o
         if (padding < 0) {
             printf("error superblock is bigger than %d Bytes", block_size);
             exit(EXIT_FAILURE);
-        } else {
-            uint8_t padding_superblock[padding];
-            memset(padding_superblock, 0, padding);
-            fwrite(padding_superblock, padding, 1, file); //inode bitmap
         }
+        uint8_t padding_superblock[padding];
+        memset(padding_superblock, 0, padding);
+        fwrite(padding_superblock, padding, 1, file); //inode bitmap
         uint8_t block[block_size];
         memset(block, 0, block_size);
         for (uint32_t i = 0; i < number_of_groups; ++i) {
@@ -52,6 +57,12 @@ void fs_create(char label[], uint16_t block_size, char name[], uint16_t number_o
     }
 }
 
+/**
+ * create filesystem img if arguments are correct
+ * @param argc arguments count
+ * @param argv arguments
+ * @return EXIT_SUCCESS or EXIT_FAILURE
+ */
 int main(int argc, char *argv[]) {
     if (argc < 5) {
         printf("block size needs to be multiple of 512 and maximum 4096\n");

@@ -8,6 +8,12 @@
 #include <stdlib.h>
 #include "common.h"
 
+/**
+ * list files in filesystem img
+ * @param argc arguments count
+ * @param argv arguments
+ * @return EXIT_SUCCESS or EXIT_FAILURE
+ */
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("usage: fs_list <img>\n");

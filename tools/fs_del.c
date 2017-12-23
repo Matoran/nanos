@@ -8,6 +8,12 @@
 #include <stdlib.h>
 #include "common.h"
 
+/**
+ * delete a file in the filesystem if exist
+ * @param argc arguments count
+ * @param argv arguments
+ * @return EXIT_SUCCESS or EXIT_FAILURE
+ */
 int main(int argc, char *argv[]) {
     if (argc < 3) {
         printf("usage: fs_del <file> <img>\n");

@@ -56,6 +56,12 @@ int strncmp(const char *p, const char *q, uint n) {
     return 0;
 }
 
+/**
+ * compare two string
+ * @param p  first string
+ * @param q second string
+ * @return -1 if p < q, 1 if p > q, 0 if p == q
+ */
 int strcmp(const char *p, const char *q) {
     while (*p == *q) {
         if (*p == '\0') {
