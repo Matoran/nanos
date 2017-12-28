@@ -72,6 +72,10 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     char *label = argv[1];
+    if (strlen(label) >= MAX_LABEL_LENGTH) {
+        printf("label length cannot be bigger than %d characters\n", MAX_LABEL_LENGTH - 1);
+        exit(EXIT_FAILURE);
+    }
     uint16_t block_size = atoi(argv[2]);
     char *name = argv[3];
     uint16_t number_of_groups = atoi(argv[4]);

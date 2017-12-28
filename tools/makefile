@@ -11,7 +11,11 @@ fs_%: fs_%.o common.o
 %.o: %.c
 	gcc -c -MMD -o $@ $< -Wall -Wextra
 
+filesystem: $(EXECUTABLES) data/nanos.ss
+	./fs_create sext2_512 512 fs.img 1 !
+	./fs_add data/nanos.ss fs.img
+
 clean:
-	rm -f *.o *.d $(EXECUTABLES)
+	rm -f *.o *.d $(EXECUTABLES) fs.img
 
 -include $(DEPS)

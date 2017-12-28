@@ -12,13 +12,6 @@ typedef struct file_descriptor_st {
     uint32_t offset;
 } file_descriptor_t;
 
-typedef struct file_descriptors_st {
-    file_descriptor_t fds[MAX_FDS];
-    uint8_t free_fds[MAX_FDS];
-    uint16_t last_fds_open;
-    uint16_t number_free_fds;
-} file_descriptors_t;
-
 void sext2_private_init(superblock_t *superblock);
 void read_block(uint32_t block_id, uint8_t *dst);
 inode_t read_inode(uint32_t inode_id);

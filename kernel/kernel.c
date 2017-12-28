@@ -5,6 +5,8 @@
  * Date : October/November 2017
  */
 
+#define BUFFER_SIZE 1024
+
 #include "kernel.h"
 #include "gdt.h"
 #include "../common/types.h"
@@ -31,7 +33,6 @@ void kernel_init(multiboot_info_t *informations) {
     keyboard_init();
     printf("RAM %dKB\n", informations->mem_upper);
     sti();
-    sext2_init();
 #ifdef TEST
     printf("Test mode on\n");
     printf("Tests will be launched soon\n");
@@ -42,6 +43,26 @@ void kernel_init(multiboot_info_t *informations) {
 #else
     printf("Test mode off\n");
 #endif
+    sleep(1000);
+    sext2_init();
+    console_clear();
+    int ss = file_open("nanos.ss");
+    if (ss != -1) {
+        uint8_t buffer[BUFFER_SIZE];
+        int bytes;
+        while ((bytes = file_read(ss, buffer, BUFFER_SIZE))) {
+            for (int i = 0; i < bytes; ++i) {
+                printf("%c", buffer[i]);
+                if (buffer[i] == '\n') {
+                    sleep(100);
+                }
+            }
+        };
+    } else {
+        printf("file not found\n");
+    }
+
+
 
     while (1) {
         if (keypressed()) {

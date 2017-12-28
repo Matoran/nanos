@@ -1,7 +1,9 @@
 BOOT=build/boot/grub
 KERNEL=build/boot/mykernel.elf
+FILESYSTEM=tools/fs.img
 run: qemu
-debug: qemudebug
+debug:
+	make run DEBUG="-s -S"
 test:
 	make run TEST_MODE=-DTEST
 iso: nanos.iso
@@ -16,11 +18,12 @@ $(BOOT)/menu.lst: grub/menu.lst
 $(KERNEL): $(BOOT) kernel common
 	make -C kernel
 	cp kernel/kernel.elf $(KERNEL)
-qemu: nanos.iso
-	qemu-system-i386 -cdrom nanos.iso -hda tools/fs.img -m 256M
-qemudebug: nanos.iso
-	qemu-system-i386 -cdrom nanos.iso -hda tools/fs.img -s -S -m 256M
+qemu: nanos.iso $(FILESYSTEM)
+	qemu-system-i386 -cdrom nanos.iso -hda $(FILESYSTEM) $(DEBUG)
+$(FILESYSTEM):
+	make -C tools filesystem
 clean:
 	rm -f -R build nanos.iso
 	make -C kernel clean
-
+	make -C tools clean
+.PHONY: $(FILESYSTEM)

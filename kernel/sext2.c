@@ -16,7 +16,10 @@
 #define MAX(a, b) (((a)>(b))?(a):(b))
 
 static superblock_t sb;
-static file_descriptors_t fds = {0};
+static file_descriptor_t fds[MAX_FDS];
+static uint8_t free_fds[MAX_FDS];
+static uint16_t last_fds_open;
+static uint16_t number_free_fds;
 
 /**
  * read superblock and init private section
@@ -63,17 +66,17 @@ int file_open(char *filename) {
     if (!inode_id) {
         return -1;
     }
-    if (fds.number_free_fds > 0) {
-        fds.number_free_fds--;
-        fds.fds[fds.number_free_fds].offset = 0;
-        fds.fds[fds.number_free_fds].inode_id = inode_id;
-        fds.fds[fds.number_free_fds].open = true;
-        return fds.free_fds[fds.number_free_fds];
-    } else if (fds.last_fds_open < MAX_FDS) {
-        fds.fds[fds.last_fds_open].offset = 0;
-        fds.fds[fds.last_fds_open].inode_id = inode_id;
-        fds.fds[fds.last_fds_open].open = true;
-        return fds.last_fds_open++;
+    if (number_free_fds > 0) {
+        number_free_fds--;
+        fds[number_free_fds].offset = 0;
+        fds[number_free_fds].inode_id = inode_id;
+        fds[number_free_fds].open = true;
+        return free_fds[number_free_fds];
+    } else if (last_fds_open < MAX_FDS) {
+        fds[last_fds_open].offset = 0;
+        fds[last_fds_open].inode_id = inode_id;
+        fds[last_fds_open].open = true;
+        return last_fds_open++;
     } else {
         printf("You have already open %d files, it's the maximum for this system.\n", MAX_FDS);
     }
@@ -88,25 +91,28 @@ int file_open(char *filename) {
  * @return -1 if error, number of bytes really read otherwise
  */
 int file_read(int fd, void *buf, uint count) {
-    file_descriptor_t file_descriptor = fds.fds[fd];
-    if (!file_descriptor.open) {
+    if (fd >= MAX_FDS) {
         return -1;
     }
-    inode_t inode = read_inode(file_descriptor.inode_id);
-    uint32_t total_left = MIN(inode.size - file_descriptor.offset, count);
+    file_descriptor_t *file_descriptor = &fds[fd];
+    if (!file_descriptor->open) {
+        return -1;
+    }
+    inode_t inode = read_inode(file_descriptor->inode_id);
+    uint32_t total_left = MIN(inode.size - file_descriptor->offset, count);
     uint32_t read = total_left;
     uint32_t buffer_offset = 0;
     uint8_t block[sb.block_size];
     while (total_left > 0) {
-        uint32_t block_id = bmap(&inode, file_descriptor.offset / sb.block_size);
-        uint32_t offset_in_block = file_descriptor.offset % sb.block_size;
+        uint32_t block_id = bmap(&inode, file_descriptor->offset / sb.block_size);
+        uint32_t offset_in_block = file_descriptor->offset % sb.block_size;
         uint32_t to_read = MIN(sb.block_size - offset_in_block, total_left);
         if (block_id != 0) {
             read_block(block_id, block);
             memcpy(buf, block, to_read);
             buf += to_read;
         }
-        file_descriptor.offset += to_read;
+        file_descriptor->offset += to_read;
         buffer_offset += to_read;
         total_left -= to_read;
     }
@@ -120,14 +126,17 @@ int file_read(int fd, void *buf, uint count) {
  * @return -1 if error, new offset otherwise
  */
 int file_seek(int fd, uint offset) {
-    if (!fds.fds[fd].open) {
+    if (fd >= MAX_FDS) {
         return -1;
     }
-    inode_t inode = read_inode(fds.fds[fd].inode_id);
+    if (!fds[fd].open) {
+        return -1;
+    }
+    inode_t inode = read_inode(fds[fd].inode_id);
     if (offset > inode.size) {
         return -1;
     }
-    fds.fds[fd].offset = offset;
+    fds[fd].offset = offset;
     return offset;
 }
 
@@ -136,8 +145,11 @@ int file_seek(int fd, uint offset) {
  * @param fd file descriptor
  */
 void file_close(int fd) {
-    memset(&fds.fds[fd], 0, sizeof(file_descriptor_t));
-    fds.free_fds[fds.number_free_fds++] = fd;
+    if (fd >= MAX_FDS) {
+        return;
+    }
+    memset(&fds[fd], 0, sizeof(file_descriptor_t));
+    free_fds[number_free_fds++] = fd;
 }
 
 /**
