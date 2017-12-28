@@ -1,4 +1,4 @@
-EXECUTABLES=fs_create fs_add fs_del fs_list
+EXECUTABLES=fs_create fs_add fs_del fs_list fs_info
 SRCS=$(wildcard *.c)
 OBJS=$(patsubst %.c,%.o, $(SRCS))
 DEPS=$(OBJS:.o=.d)
