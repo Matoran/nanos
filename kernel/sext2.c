@@ -109,7 +109,7 @@ int file_read(int fd, void *buf, uint count) {
         uint32_t to_read = MIN(sb.block_size - offset_in_block, total_left);
         if (block_id != 0) {
             read_block(block_id, block);
-            memcpy(buf, block, to_read);
+            memcpy(buf, block + offset_in_block, to_read);
             buf += to_read;
         }
         file_descriptor->offset += to_read;

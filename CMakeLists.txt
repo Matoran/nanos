@@ -39,7 +39,7 @@ set(CMAKE_C_STANDARD 99)
 set(SOURCE_FILES tools/fs_create.c tools/structs.h tools/common.c tools/common.h)
 add_executable(fs_create ${SOURCE_FILES})
 
-set(SOURCE_FILES tools/fs_add.c tools/structs.h tools/common.c tools/common.h)
+set(SOURCE_FILES tools/fs_add.c tools/structs.h tools/common.c tools/common.h tools/fs_info.c)
 add_executable(fs_add ${SOURCE_FILES})
 
 set(SOURCE_FILES tools/fs_del.c tools/structs.h tools/common.c tools/common.h)
